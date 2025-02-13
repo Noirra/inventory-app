@@ -1,0 +1,145 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum ItemStatus {
+  UNUSED
+  USED
+  BROKEN
+  REPAIRED
+}
+
+enum Status {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model User {
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  roles        UserRole[]
+  userItems    UserItem[]
+  itemRequests ItemRequest[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+model Role {
+  id        String     @id @default(uuid())
+  name      String
+  users     UserRole[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+}
+
+model UserRole {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [usersId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  usersId   String
+  role      Role     @relation(fields: [rolesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  rolesId   String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Area {
+  id        String   @id @default(uuid())
+  name      String
+  code      String
+  items     Item[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id        String   @id @default(uuid())
+  name      String
+  code      String
+  items     Item[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Item {
+  id                String          @id @default(uuid())
+  categoryId        String
+  category          Category        @relation(fields: [categoryId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  areaId            String
+  area              Area            @relation(fields: [areaId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name              String
+  price             Int
+  photo             String
+  receipt           String
+  status            ItemStatus      @default(UNUSED)
+  code              String
+  examinationPeriod String?
+  groupCode         String?
+  components        Component[]
+  userItems         UserItem[]
+  repairRequests    RepairRequest[]
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+}
+
+model Component {
+  id        String   @id @default(uuid())
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name      String
+  code      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model UserItem {
+  id        String   @id @default(uuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  items     Json
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Item Item[]
+}
+
+model ItemRequest {
+  id            String   @id @default(uuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  name          String
+  desc          String
+  priceRange    String
+  referenceLink String
+  code          String
+  status        Status   @default(PENDING)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+}
+
+model RepairRequest {
+  id              String   @id @default(uuid())
+  itemId          String
+  item            Item     @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  repairReason    String
+  estimatedPrice  String
+  status          Status   @default(PENDING)
+  code            String
+  timestampStatus DateTime
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
