@@ -1,6 +1,7 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { FaArrowLeft, FaSave, FaSignOutAlt, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaCog } from "react-icons/fa";
-import { useNavigate, useParams, Link } from "react-router-dom";
+import { FaArrowLeft, FaSave, } from "react-icons/fa";
+import Sidebar from "@/components/ui/sidebar";
+import { useNavigate, useParams } from "react-router-dom";
 
 export default function EditCategory() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -54,18 +55,7 @@ export default function EditCategory() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className="w-64 bg-[#0A2342] text-white flex flex-col p-4">
-        <h2 className="text-lg font-semibold">Admin Panel</h2>
-        <nav className="flex-1 py-4 space-y-2">
-          <Link to="/admindashboard" className="flex items-center px-4 py-2 hover:bg-[#173E67] rounded-lg space-x-4"><FaChartBar /><span>Dashboard</span></Link>
-          <Link to="/users" className="flex items-center px-4 py-2 hover:bg-[#173E67] rounded-lg space-x-4"><FaUsers /><span>Users</span></Link>
-          <Link to="/categories" className="flex items-center px-4 py-2 hover:bg-[#173E67] rounded-lg space-x-4"><FaThLarge /><span>Categories</span></Link>
-          <Link to="/settings" className="flex items-center px-4 py-2 hover:bg-[#173E67] rounded-lg space-x-4"><FaCog /><span>Settings</span></Link>
-        </nav>
-        <button onClick={() => navigate("/login")} className="w-full flex items-center justify-center py-2 rounded-2xl bg-red-500 hover:bg-red-600 space-x-2">
-          <FaSignOutAlt /><span>Logout</span>
-        </button>
-      </div>
+      <Sidebar /> 
 
       {/* Main Content */}
       <div className="flex-1 p-6">
