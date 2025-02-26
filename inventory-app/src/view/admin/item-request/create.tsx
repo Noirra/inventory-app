@@ -5,8 +5,7 @@ import { FaArrowLeft, FaSave } from "react-icons/fa";
 
 export default function CreateItemRequest() {
   const navigate = useNavigate();
-  
-  // State untuk menyimpan data form
+
   const [formData, setFormData] = useState({
     name: "",
     desc: "",
@@ -16,16 +15,14 @@ export default function CreateItemRequest() {
     status: "PENDING",
   });
 
-  // Fungsi untuk menangani perubahan input dalam form
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Fungsi untuk menangani submit form
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Mencegah reload halaman saat submit
+    e.preventDefault(); 
     console.log("Item Request Created:", formData);
-    navigate("/items"); // Redirect ke halaman daftar item
+    navigate("/items"); 
   };
 
   return (
@@ -34,7 +31,7 @@ export default function CreateItemRequest() {
       <Sidebar />
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow border p-6">
-          <button onClick={() => navigate("/items")} className="mb-4 flex items-center text-blue-500 hover:underline">
+          <button onClick={() => navigate("/item-request")} className="mb-4 flex items-center text-blue-500 hover:underline">
             <FaArrowLeft className="mr-2" /> Back
           </button>
           <h2 className="text-xl font-semibold mb-4">Create New Item</h2>

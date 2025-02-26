@@ -41,7 +41,7 @@ export default function ItemRequest() {
               onClick={() => navigate("/item-request/create")}
               className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             >
-              <FaPlus /> <span>Add Item</span>
+              <FaPlus /> <span>Add Item Request</span>
             </button>
           </div>
           <table className="w-full border-collapse border">

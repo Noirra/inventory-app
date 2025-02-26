@@ -5,9 +5,8 @@ import { FaArrowLeft, FaSave } from "react-icons/fa";
 
 export default function EditItemRequest() {
   const navigate = useNavigate();
-  const { id } = useParams(); // Ambil ID item dari URL
+  const { id } = useParams(); 
 
-  // State untuk menyimpan data form
   const [formData, setFormData] = useState({
     name: "",
     desc: "",
@@ -17,9 +16,7 @@ export default function EditItemRequest() {
     status: "PENDING",
   });
 
-  // Simulasi pengambilan data item berdasarkan ID (dapat diganti dengan API call)
   useEffect(() => {
-    // Fetch data dari API (contoh data statis untuk sementara)
     const fetchData = async () => {
       const itemData = {
         name: "Laptop Dell XPS",
@@ -34,16 +31,14 @@ export default function EditItemRequest() {
     fetchData();
   }, [id]);
 
-  // Fungsi untuk menangani perubahan input dalam form
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
-  // Fungsi untuk menangani submit form
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); // Mencegah reload halaman saat submit
+    e.preventDefault(); 
     console.log("Item Request Updated:", formData);
-    navigate("/items"); // Redirect ke halaman daftar item setelah update
+    navigate("/items"); 
   };
 
   return (
@@ -52,7 +47,7 @@ export default function EditItemRequest() {
       <Sidebar />
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow border p-6">
-          <button onClick={() => navigate("/items")} className="mb-4 flex items-center text-blue-500 hover:underline">
+          <button onClick={() => navigate("/item-request")} className="mb-4 flex items-center text-blue-500 hover:underline">
             <FaArrowLeft className="mr-2" /> Back
           </button>
           <h2 className="text-xl font-semibold mb-4">Edit Item Request</h2>
