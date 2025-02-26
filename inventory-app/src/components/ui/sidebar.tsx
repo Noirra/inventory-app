@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaBars, FaSignOutAlt, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaCog } from "react-icons/fa";
+import { FaBars, FaSignOutAlt, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaBoxOpen } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 interface SidebarProps {
@@ -15,7 +15,7 @@ export default function Sidebar({ handleLogout }: SidebarProps) {
     { name: "Inventory", icon: <FaBox />, path: "/item" },
     { name: "Category", icon: <FaThLarge />, path: "/category" },
     { name: "Area", icon: <FaMapMarkedAlt />, path: "/area" },
-    { name: "Settings", icon: <FaCog />, path: "/settings" },
+    { name: "Item Request", icon: <FaBoxOpen />, path: "/item-request" },
   ];
 
   return (

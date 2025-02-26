@@ -15,7 +15,10 @@ import EditCategory from "./view/admin/category/edit";
 import AdminItem from "./view/admin/item/index";
 import AdminItems from "./view/admin/komponen/index";
 import CreateItem from "./view/admin/item/create";
-import EditItem from "./view/admin/item/edit"; 
+import EditItem from "./view/admin/item/edit";
+import ItemRequest from "./view/admin/item-request/index";
+import CreateItemRequest from "./view/admin/item-request/create";
+import EditItemRequest from "./view/admin/item-request/edit";
 import Inventory from "./view/employee/itemrequest/inventory";
 
 function App() {
@@ -39,6 +42,9 @@ function App() {
         <Route path="/items/create" element={<CreateItem />} />
         <Route path="/items/edit/:itemId" element={<EditItem />} />
         <Route path="/items/komponen/:itemId" element={<AdminItems />} />
+        <Route path="/item-request" element={<ItemRequest />} />
+        <Route path="/item-request/create" element={<CreateItemRequest />} />
+        <Route path="/item-request/edit/:itemId" element={<EditItemRequest />} />
         <Route path="/employeedashboard" element={<Dashboard />} />
         <Route path="/inventory" element={<Inventory />} />
       </Routes>
