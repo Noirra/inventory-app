@@ -49,7 +49,7 @@ export default function CreateItem() {
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow border p-6">
-          <button onClick={() => navigate("/items")} className="mb-4 flex items-center text-blue-500 hover:underline">
+          <button onClick={() => navigate("/item")} className="mb-4 flex items-center text-blue-500 hover:underline">
             <FaArrowLeft className="mr-2" /> Back
           </button>
           <h2 className="text-xl font-semibold mb-4">Create New Item</h2>
