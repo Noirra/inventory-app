@@ -2,7 +2,6 @@ import { Context } from "hono";
 import prisma from "../../prisma/client";
 import { randomBytes } from "crypto";
 
-// Function to get all components by itemId
 export async function getComponentsByItemId(c: Context) {
     try {
         const itemId = c.req.param("itemId");
@@ -27,7 +26,6 @@ export async function getComponentsByItemId(c: Context) {
     }
 }
 
-// Function to get component by ID
 export async function getComponentById(c: Context) {
     try {
         const itemId = c.req.param("itemId");
@@ -59,7 +57,6 @@ export async function getComponentById(c: Context) {
     }
 }
 
-// Function to create a new component
 export async function createComponent(c: Context) {
     try {
         const itemId = c.req.param("itemId");
@@ -95,7 +92,6 @@ export async function createComponent(c: Context) {
     }
 }
 
-// Function to update a component
 export async function updateComponent(c: Context) {
     try {
         const itemId = c.req.param("itemId");
@@ -136,7 +132,6 @@ export async function updateComponent(c: Context) {
     }
 }
 
-// Function to delete a component
 export async function deleteComponent(c: Context) {
     try {
         const itemId = c.req.param("itemId");

@@ -59,7 +59,7 @@ export const registerUser = async (c: Context) => {
                 name,
                 roles: {
                     create: {
-                        rolesId: employeeRole.id,
+                        roleId: employeeRole.id,
                     },
                 },
             },

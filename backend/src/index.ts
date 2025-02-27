@@ -8,39 +8,27 @@ import { CategoriesRoutes } from "./routes/categoryRoutes";
 import { ItemRoutes } from "./routes/itemRoutes";
 import { ItemRequestRoutes } from "./routes/itemRequestRoutes";
 import { ComponentRoutes } from "./routes/itemComponentRoutes";
+import { userItemRoutes } from "./routes/userItemRoutes";
+import { authMiddleware } from "./routes/middleware/authMiddleware";
+import { getRouterName, showRoutes } from 'hono/dev'
 
 const app = new Hono();
 const JWT_SECRET = "admin123";
 
 app.route("/auth", AuthRoutes);
 
-app.use("*", async (c, next) => {
-  const authHeader = c.req.header("Authorization");
-  if (authHeader) {
-    const token = authHeader.split(" ")[1];
-    if (!token) {
-      return c.json({ success: false, message: "Token has been logged out." }, 401);
-    }
-  }
-  await next();
-});
-
-app.use("*", async (c, next) => {
-  if (!c.req.path.startsWith("/auth")) {
-    return jwt({ secret: JWT_SECRET })(c, next);
-  }
-  await next();
-});
+// app.use("*", authMiddleware)
+//
+// app.use("*", async (c, next) => {
+//   if (!c.req.path.startsWith("/auth")) {
+//     return jwt({ secret: JWT_SECRET })(c, next);
+//   }
+//   await next();
+// });
 
 app.get("/profile", async (c) => {
   const user = c.get("jwtPayload");
   return c.json({ user });
-});
-
-const adminRoutes = [""];
-
-adminRoutes.forEach((route) => {
-  app.use(route, authorizeRole(["admin"]));
 });
 
 app.route("/users", UserRoutes);
@@ -49,5 +37,8 @@ app.route("/categories", CategoriesRoutes);
 app.route("/items", ItemRoutes);
 app.route("/", ComponentRoutes);
 app.route("/item-request", ItemRequestRoutes);
+app.route("/user-items", userItemRoutes);
+
+showRoutes(app);
 
 export default app;

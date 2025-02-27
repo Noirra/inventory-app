@@ -55,10 +55,10 @@ export const createCategory = async (c: Context) => {
         const name = typeof body["name"] === "string" ? body["name"] : "";
         const code = typeof body["code"] === "string" ? body["code"] : "";
 
-        if (!name || !code || code.length > 3) {
+        if (!code || code.length > 3) {
             return c.json({
                 success: false,
-                message: "Name is required and code must be at most 3 characters.",
+                message: "code must be at most 3 characters.",
             }, 400);
         }
 
