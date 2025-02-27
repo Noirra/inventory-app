@@ -57,10 +57,10 @@ export async function createArea(c: Context) {
         const name = typeof body["name"] === "string" ? body["name"] : "";
         const code = typeof body["code"] === "string" ? body["code"] : "";
 
-        if (!name || !code || code.length > 3) {
+        if (!code || code.length > 3) {
             return c.json({
                 success: false,
-                message: "Name and code (max 3 characters) are required.",
+                message: "code (max 3 characters) are required.",
             }, 400);
         }
 

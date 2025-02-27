@@ -7,7 +7,6 @@ export const getItemRequests = async (c: Context) => {
     try {
         const user = c.get("jwtPayload");
         const itemRequests = await prisma.itemRequest.findMany({
-            where: { userId: user.id },
             orderBy: { createdAt: "desc" },
         });
 
@@ -25,37 +24,6 @@ export const getItemRequests = async (c: Context) => {
         }, 500);
     }
 };
-
-export async function getItemRequestById(c: Context) {
-    try {
-        const user = c.get("jwtPayload");
-        const requestId = c.req.param("id");
-
-        const itemRequest = await prisma.itemRequest.findUnique({
-            where: { id: requestId, userId: user.id },
-        });
-
-        if (!itemRequest) {
-            return c.json({
-                success: false,
-                message: "Item Request Not Found!",
-            }, 404);
-        }
-
-        return c.json({
-            success: true,
-            message: `Item Request Details for ID: ${requestId}`,
-            data: itemRequest,
-        }, 200);
-    } catch (e: unknown) {
-        console.error(`Error finding item request: ${e}`);
-        return c.json({
-            success: false,
-            message: "Failed to retrieve item request.",
-            error: e instanceof Error ? e.message : "Unknown error",
-        }, 500);
-    }
-}
 
 export async function createItemRequest(c: Context) {
     try {
@@ -94,14 +62,13 @@ export async function createItemRequest(c: Context) {
     }
 }
 
-export async function updateItemRequest(c: Context) {
+export async function approveAdmin(c: Context) {
     try {
-        const user = c.get("jwtPayload");
         const requestId = c.req.param("id");
-        const body = await c.req.parseBody();
+        const user = c.get("jwtPayload");
 
         const existingRequest = await prisma.itemRequest.findUnique({
-            where: { id: requestId, userId: user.id },
+            where: { id: requestId },
         });
 
         if (!existingRequest) {
@@ -111,31 +78,130 @@ export async function updateItemRequest(c: Context) {
             }, 404);
         }
 
-        const statusValues: Status[] = Object.values(Status);
-        const newStatus = body["status"] as Status | undefined;
+        await prisma.requestApproved.create({
+            data: { requestId, userId: user.id },
+        });
 
-        if (!newStatus || !statusValues.includes(newStatus)) {
+        return c.json({
+            success: true,
+            message: "Item Request Approved!",
+        }, 200);
+    } catch (e: unknown) {
+        console.error(`Error approving item request: ${e}`);
+        return c.json({
+            success: false,
+            message: "Failed to approve item request.",
+            error: e instanceof Error ? e.message : "Unknown error",
+        }, 500);
+    }
+}
+
+export async function approveOwner(c: Context) {
+    try {
+        const user = c.get("jwtPayload");
+        const requestId = c.req.param("id");
+
+        const existingRequest = await prisma.itemRequest.findUnique({
+            where: { id: requestId },
+        });
+
+        if (!existingRequest) {
             return c.json({
                 success: false,
-                message: "Invalid status value.",
+                message: "Item Request Not Found!",
+            }, 404);
+        }
+
+        if (existingRequest.status !== "PENDING") {
+            return c.json({
+                success: false,
+                message: "Request sudah diproses sebelumnya!",
             }, 400);
         }
 
         const updatedRequest = await prisma.itemRequest.update({
             where: { id: requestId },
-            data: { status: newStatus },
+            data: { status: "APPROVED" },
         });
 
         return c.json({
             success: true,
-            message: "Item Request Status Updated Successfully!",
+            message: "Item Request Approved by Owner!",
             data: updatedRequest,
         }, 200);
     } catch (e: unknown) {
-        console.error(`Error updating item request: ${e}`);
+        console.error(`Error approving item request by owner: ${e}`);
         return c.json({
             success: false,
-            message: "Failed to update item request.",
+            message: "Failed to approve item request by owner.",
+            error: e instanceof Error ? e.message : "Unknown error",
+        }, 500);
+    }
+}
+
+export async function rejectItemRequest(c: Context) {
+    try {
+        const requestId = c.req.param("id");
+
+        const existingRequest = await prisma.itemRequest.findUnique({
+            where: { id: requestId },
+        });
+
+        if (!existingRequest) {
+            return c.json({
+                success: false,
+                message: "Item Request Not Found!",
+            }, 404);
+        }
+
+        await prisma.itemRequest.update({
+            where: { id: requestId },
+            data: { status: Status.REJECTED },
+        });
+
+        return c.json({
+            success: true,
+            message: "Item Request Rejected!",
+        }, 200);
+    } catch (e: unknown) {
+        console.error(`Error rejecting item request: ${e}`);
+        return c.json({
+            success: false,
+            message: "Failed to reject item request.",
+            error: e instanceof Error ? e.message : "Unknown error",
+        }, 500);
+    }
+}
+
+export async function completeItemRequest(c: Context) {
+    try {
+        const requestId = c.req.param("id");
+
+        const existingRequest = await prisma.itemRequest.findUnique({
+            where: { id: requestId },
+        });
+
+        if (!existingRequest) {
+            return c.json({
+                success: false,
+                message: "Item Request Not Found!",
+            }, 404);
+        }
+
+        await prisma.itemRequest.update({
+            where: { id: requestId },
+            data: { status: Status.COMPLETED },
+        });
+
+        return c.json({
+            success: true,
+            message: "Item Request Marked as Completed!",
+        }, 200);
+    } catch (e: unknown) {
+        console.error(`Error completing item request: ${e}`);
+        return c.json({
+            success: false,
+            message: "Failed to complete item request.",
             error: e instanceof Error ? e.message : "Unknown error",
         }, 500);
     }

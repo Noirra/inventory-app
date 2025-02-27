@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -17,7 +11,6 @@ enum ItemStatus {
   UNUSED
   USED
   BROKEN
-  REPAIRED
 }
 
 enum Status {
@@ -28,15 +21,16 @@ enum Status {
 }
 
 model User {
-  id           String        @id @default(uuid())
+  id           String            @id @default(uuid())
   name         String
-  email        String        @unique
+  email        String            @unique
   password     String
   roles        UserRole[]
   userItems    UserItem[]
   itemRequests ItemRequest[]
-  createdAt    DateTime      @default(now())
-  updatedAt    DateTime      @updatedAt
+  approvals    RequestApproved[]
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 }
 
 model Role {
@@ -49,10 +43,10 @@ model Role {
 
 model UserRole {
   id        String   @id @default(uuid())
-  user      User     @relation(fields: [usersId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  usersId   String
-  role      Role     @relation(fields: [rolesId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  rolesId   String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  roleId    String
+  role      Role     @relation(fields: [roleId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -111,36 +105,45 @@ model UserItem {
   id        String   @id @default(uuid())
   userId    String
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  items     Json
+  itemId    String
+  item      Item     @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  Item Item[]
 }
 
 model ItemRequest {
-  id            String   @id @default(uuid())
+  id            String            @id @default(uuid())
   userId        String
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
   name          String
   desc          String
   priceRange    String
   referenceLink String
-  code          String   @unique
-  status        Status   @default(PENDING)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  code          String            @unique
+  status        Status            @default(PENDING)
+  approvals     RequestApproved[]
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+}
+
+model RequestApproved {
+  id        String      @id @default(uuid())
+  requestId String
+  request   ItemRequest @relation(fields: [requestId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  userId    String
+  user      User        @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
 }
 
 model RepairRequest {
-  id              String   @id @default(uuid())
-  itemId          String
-  item            Item     @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: Cascade)
-  repairReason    String
-  estimatedPrice  String
-  status          Status   @default(PENDING)
-  code            String   @unique
-  timestampStatus DateTime
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id             String   @id @default(uuid())
+  itemId         String
+  item           Item     @relation(fields: [itemId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+  repairReason   String
+  estimatedPrice String
+  status         Status   @default(PENDING)
+  code           String   @unique
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }

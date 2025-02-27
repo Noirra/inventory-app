@@ -15,30 +15,6 @@ async function main() {
         })
     );
 
-    const hashedPassword = await hash("admin1234", 10);
-    const user = await prisma.user.upsert({
-        where: { email: "janedoe@gmail.com" },
-        update: {},
-        create: {
-            name: "Jane Doe",
-            email: "janedoe@gmail.com",
-            password: hashedPassword,
-        },
-    });
-
-    await Promise.all(
-        roleRecords
-            .filter((role) => role.name === "employee" || role.name === "admin")
-            .map((role) =>
-                prisma.userRole.create({
-                    data: {
-                        usersId: user.id,
-                        rolesId: role.id,
-                    },
-                })
-            )
-    );
-
     console.log("Seeding completed.");
 }
 
