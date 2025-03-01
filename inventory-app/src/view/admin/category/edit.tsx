@@ -13,16 +13,15 @@ export default function EditCategory() {
   });
 
   useEffect(() => {
-    // Simulasi fetch data kategori berdasarkan categoryId
     const fetchCategory = async () => {
       try {
-        const response = await fetch(`/api/categories/${categoryId}`); // Ganti dengan URL API backend Laravel
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/categories/${categoryId}`); // Ganti dengan URL API backend Laravel
         const data = await response.json();
 
         setCategory({
-          name: data.name || "",
-          code: data.code || "",
-        });
+          code: data.data.code,
+          name: data.data.name
+        })
       } catch (error) {
         console.error("Failed to fetch category:", error);
       }
@@ -38,15 +37,18 @@ export default function EditCategory() {
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
+    
+
     try {
-      await fetch(`/api/categories/${categoryId}`, {
-        method: "PUT", // Gunakan PUT untuk update
-        headers: { "Content-Type": "application/json" },
+      await fetch(`${import.meta.env.VITE_BASE_URL}/categories/${categoryId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(category),
       });
-
-      console.log("Category updated successfully.");
-      navigate("/categories");
+  
+      navigate("/category");
     } catch (error) {
       console.error("Failed to update category:", error);
     }

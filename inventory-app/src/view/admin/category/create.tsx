@@ -14,11 +14,16 @@ export default function CreateCategory() {
     setCategory({ ...category, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // Simulasi submit - di sini Anda bisa melakukan POST request ke backend menggunakan fetch atau axios
-    console.log("Category Created:", category);
+    await fetch(`${import.meta.env.VITE_BASE_URL}/categories`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(category),
+    });
 
     navigate("/category");
   };
