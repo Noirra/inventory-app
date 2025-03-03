@@ -59,10 +59,6 @@ export default function AdminCategory() {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   const deleteCategory = async (id: string) => {
     const confirmDelete = await Swal.fire({
@@ -102,7 +98,7 @@ export default function AdminCategory() {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <Sidebar handleLogout={handleLogout} />
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 p-6 overflow-y-auto">

@@ -57,10 +57,6 @@ export default function AdminArea() {
     }
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
 
   const deleteArea = async (id: string) => {
     const confirmDelete = await Swal.fire({
@@ -99,7 +95,7 @@ export default function AdminArea() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      <Sidebar handleLogout={handleLogout} />
+      <Sidebar />
       <div className="flex-1 p-6 overflow-y-auto">
         <h1 className="text-2xl font-semibold mb-6">Area Management</h1>
         <div className="bg-white p-6 rounded-2xl shadow border">

@@ -1,12 +1,9 @@
 import { useState } from "react";
-import { FaBars, FaSignOutAlt, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaBoxOpen, FaTools } from "react-icons/fa";
+import { FaBars, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaBoxOpen, FaTools } from "react-icons/fa";
 import { Link } from "react-router-dom";
+import LogoutButton from "@/components/ui/logoutbutton";
 
-interface SidebarProps {
-  handleLogout?: () => void;
-}
-
-export default function Sidebar({ handleLogout }: SidebarProps) {
+export default function Sidebar() {  // ❌ Hapus handleLogout dari sini
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
@@ -41,15 +38,7 @@ export default function Sidebar({ handleLogout }: SidebarProps) {
         ))}
       </nav>
 
-      <div className="p-4">
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center justify-center py-2 rounded-2xl bg-red-500 hover:bg-red-600 text-white space-x-2"
-        >
-          <FaSignOutAlt />
-          {sidebarOpen && <span>Logout</span>}
-        </button>
-      </div>
+      <LogoutButton />
     </div>
   );
 }

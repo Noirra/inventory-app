@@ -20,7 +20,7 @@ const products = [
   { name: "Product E", stock: 200, price: 20.0 },
 ];
 
-export default function Dashboard() {
+export default function EmployeeDashboard() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const navigate = useNavigate(); // ✅ Pindahkan useNavigate ke dalam komponen
 
