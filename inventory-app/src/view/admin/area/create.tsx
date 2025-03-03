@@ -14,13 +14,27 @@ export default function CreateArea() {
     setArea({ ...area, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    // Simulasi submit - di sini Anda bisa melakukan POST request ke backend menggunakan fetch atau axios
-    console.log("Area Created:", area);
-
-    navigate("/area");
+  
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/areas`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(area),
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(result.message || "Gagal menambahkan kategori");
+      }
+      navigate("/area?success=created");
+    } catch (error: any) {
+      alert(error.message || "Terjadi kesalahan");
+    }
   };
 
   return (

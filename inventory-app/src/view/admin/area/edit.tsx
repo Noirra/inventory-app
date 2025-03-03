@@ -13,21 +13,21 @@ export default function EditArea() {
   });
 
   useEffect(() => {
-    const fetchEdit = async () => {
+    const fetchArea = async () => {
       try {
-        const response = await fetch(`/api/area/${areaId}`); // Ganti dengan URL API backend Laravel
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/areas/${areaId}`); 
         const data = await response.json();
 
         setArea({
-          name: data.name || "",
-          code: data.code || "",
-        });
+          name: data.data.name,
+          code: data.data.code
+        })
       } catch (error) {
         console.error("Failed to fetch area:", error);
       }
     };
 
-    fetchEdit();
+    fetchArea();
   }, [areaId]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -36,16 +36,21 @@ export default function EditArea() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
+  
     try {
-      await fetch(`/api/categories/${areaId}`, {
-        method: "PUT", // Gunakan PUT untuk update
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/areas/${areaId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify(area),
       });
-
-      console.log("Area updated successfully.");
-      navigate("/area");
+  
+      if (!response.ok) {
+        throw new Error("Failed to update area");
+      }
+  
+      navigate("/area?success=updated");
     } catch (error) {
       console.error("Failed to update area:", error);
     }
