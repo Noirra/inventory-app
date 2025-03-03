@@ -15,7 +15,7 @@ export default function EditCategory() {
   useEffect(() => {
     const fetchCategory = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/categories/${categoryId}`); // Ganti dengan URL API backend Laravel
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/categories/${categoryId}`); 
         const data = await response.json();
 
         setCategory({
@@ -36,11 +36,9 @@ export default function EditCategory() {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    
-
+  
     try {
-      await fetch(`${import.meta.env.VITE_BASE_URL}/categories/${categoryId}`, {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/categories/${categoryId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -48,7 +46,11 @@ export default function EditCategory() {
         body: JSON.stringify(category),
       });
   
-      navigate("/category");
+      if (!response.ok) {
+        throw new Error("Failed to update category");
+      }
+  
+      navigate("/category?success=updated");
     } catch (error) {
       console.error("Failed to update category:", error);
     }
