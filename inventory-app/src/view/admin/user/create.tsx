@@ -15,13 +15,27 @@ export default function CreateUser() {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    // Simulasi submit - di sini Anda bisa melakukan POST request ke backend menggunakan fetch atau axios
-    console.log("User Created:", user);
-
-    navigate("/users");
+  
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/users`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      });
+  
+      const result = await response.json();
+  
+      if (!response.ok) {
+        throw new Error(result.message || "Gagal menambahkan user");
+      }
+      navigate("/user?success=created");
+    } catch (error: any) {
+      alert(error.message || "Terjadi kesalahan");
+    }
   };
 
   return (

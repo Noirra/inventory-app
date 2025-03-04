@@ -73,8 +73,14 @@ export default function AdminUser() {
     });
 
     if (confirmDelete.isConfirmed) {
-      setUsers(users.filter(user => user.id !== id));
-      Swal.fire("Deleted!", "User has been deleted.", "success");
+      try {
+        await fetch(`${import.meta.env.VITE_BASE_URL}/users/${id}`, { method: "DELETE" });
+        fetchData();
+        Swal.fire("Deleted!", "User has been deleted.", "success");
+      } catch (error) {
+        console.error("Failed to delete user:", error);
+        Swal.fire("Error", "Failed to delete user.", "error");
+      }
     }
   };
 

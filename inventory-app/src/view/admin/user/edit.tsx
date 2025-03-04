@@ -5,7 +5,7 @@ import { useNavigate, useParams } from "react-router-dom";
 
 export default function EditUser() {
   const navigate = useNavigate();
-  const { id } = useParams();
+  const { userId } = useParams();
   const [user, setUser] = useState({
     name: "",
     email: "",
@@ -13,30 +13,49 @@ export default function EditUser() {
   });
 
   useEffect(() => {
-    // Simulasi mengambil data pengguna berdasarkan ID (di sini bisa pakai fetch atau axios dari backend)
     const fetchUser = async () => {
-      const userData = {
-        name: "John Doe",
-        email: "john@example.com",
-        password: "", // Kosongkan untuk keamanan
-      };
-      setUser(userData);
+      try {
+        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/users/${userId}`); 
+        const data = await response.json();
+        console.log(data);
+
+        setUser({
+          name: data.user.name,
+          email: data.user.email,
+          password: data.user.password
+        })
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+      }
     };
 
     fetchUser();
-  }, [id]);
+  }, [userId]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setUser({ ...user, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-
-    // Simulasi update - di sini Anda bisa melakukan PUT/PATCH request ke backend
-    console.log("User Updated:", user);
-
-    navigate("/users");
+  
+    try {
+      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(user),
+      });
+  
+      if (!response.ok) {
+        throw new Error("Failed to update user");
+      }
+  
+      navigate("/user?success=updated");
+    } catch (error) {
+      console.error("Failed to update user:", error);
+    }
   };
 
   return (
