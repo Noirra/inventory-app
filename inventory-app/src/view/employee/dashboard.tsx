@@ -1,18 +1,17 @@
+import { useNavigate } from "react-router-dom";
 import { useState } from "react";
+import Sidebar from "@/components/sidebar/employee";
 import {
-  FaBars,
-  FaSignOutAlt,
   FaSearch,
   FaBox,
   FaShoppingCart,
-  FaWarehouse,
   FaExclamationCircle,
-  FaChartBar,
-  FaCog,
+  FaUsers,
+  FaMoon,
+  FaSun,
 } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom"; // ✅ Perbaikan: Tambahkan useNavigate di sini
 
-const products = [
+const initialProducts = [
   { name: "Product A", stock: 120, price: 25.0 },
   { name: "Product B", stock: 80, price: 40.0 },
   { name: "Product C", stock: 0, price: 15.0 },
@@ -20,133 +19,190 @@ const products = [
   { name: "Product E", stock: 200, price: 20.0 },
 ];
 
-export default function EmployeeDashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const navigate = useNavigate(); // ✅ Pindahkan useNavigate ke dalam komponen
+export default function AdminDashboard() {
+  const navigate = useNavigate();
+  const [searchTerm, setSearchTerm] = useState("");
+  const [stockFilter, setStockFilter] = useState("all"); // all, in-stock, out-of-stock
+  const [darkMode, setDarkMode] = useState(false);
 
   const handleLogout = () => {
-    // 👉 Hapus token atau session jika ada
-    localStorage.removeItem("token"); // Opsional jika pakai token
-    navigate("/login"); // ✅ Navigasi ke halaman login
+    localStorage.removeItem("token");
+    navigate("/login");
+  };
+
+  // Filter dan pencarian
+  const filteredProducts = initialProducts
+    .filter((product) =>
+      product.name.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .filter((product) => {
+      if (stockFilter === "all") return true;
+      if (stockFilter === "in-stock") return product.stock > 0;
+      if (stockFilter === "out-of-stock") return product.stock <= 0;
+      return true;
+    });
+
+  const summaryCards = [
+    {
+      title: "Total Users",
+      value: 120,
+      icon: <FaUsers className="text-green-500" />,
+      borderColor: "border-green-400",
+    },
+    {
+      title: "Total Products",
+      value: 5483,
+      icon: <FaBox className="text-blue-500" />,
+      borderColor: "border-blue-400",
+    },
+    {
+      title: "Orders",
+      value: 2859,
+      icon: <FaShoppingCart className="text-purple-500" />,
+      borderColor: "border-purple-400",
+    },
+    {
+      title: "Out of Stock",
+      value: 38,
+      icon: <FaExclamationCircle className="text-red-500" />,
+      borderColor: "border-red-400",
+    },
+  ];
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode);
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
+    <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"} flex h-screen transition-colors duration-300`}>
       {/* Sidebar */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? "w-64" : "w-20"} bg-[#0A2342] text-white flex flex-col`}>
-        <div className="flex items-center justify-between px-4 py-4 border-b border-white/20">
-          {sidebarOpen && (
-            <div className="flex items-center space-x-3">
-              <img
-                src="https://via.placeholder.com/40"
-                alt="Profile"
-                className="rounded-full w-10 h-10"
-              />
-              <div>
-                <p className="font-semibold">User Name</p>
-                <p className="text-sm text-gray-300">user@example.com</p>
-              </div>
-            </div>
-          )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white text-lg">
-            <FaBars />
-          </button>
-        </div>
-
-        <nav className="flex-1 py-4 space-y-2">
-          {["Dashboard", "Inventory", "Settings"].map((item, index) => (
-            <Link
-              key={index}
-              to={item === "Dashboard" ? "/" : `/${item.toLowerCase()}`}
-              className="flex items-center px-4 py-2 hover:bg-[#173E67] rounded-lg space-x-4"
-            >
-              {item === "Dashboard" && <FaChartBar />}
-              {item === "Inventory" && <FaBox />}
-              {item === "Settings" && <FaCog />}
-              {sidebarOpen && <span>{item}</span>}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4">
-          <button
-            onClick={handleLogout} // ✅ Pastikan onClick memanggil handleLogout
-            className="w-full flex items-center justify-center py-2 rounded-2xl bg-red-500 hover:bg-red-600 text-white space-x-2"
-          >
-            <FaSignOutAlt />
-            {sidebarOpen && <span>Logout</span>}
-          </button>
-        </div>
-      </div>
+      <Sidebar />
 
       {/* Main Content */}
       <div className="flex-1 p-6 overflow-y-auto">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Welcome Employee!</h1>
+          <div>
+            <h1 className="text-2xl font-bold mb-1">Admin Inventory</h1>
+            <p className="text-sm text-gray-500 dark:text-gray-300">
+              Welcome Admin! Manage your data effectively.
+            </p>
+          </div>
+
           <div className="flex items-center space-x-4">
-            <div className="flex items-center border rounded-full px-4 py-2 shadow-sm bg-white">
-              <FaSearch className="text-gray-500" />
+            {/* Toggle Dark Mode */}
+            <button
+              onClick={toggleDarkMode}
+              className="p-2 rounded-full bg-white dark:bg-gray-800 shadow"
+              aria-label="Toggle Dark Mode"
+            >
+              {darkMode ? <FaSun className="text-yellow-400" /> : <FaMoon />}
+            </button>
+
+            {/* Search Box */}
+            <div className="flex items-center border rounded-full px-4 py-2 shadow-sm bg-white dark:bg-gray-800">
+              <FaSearch className="text-gray-500" aria-hidden="true" />
               <input
                 type="text"
-                placeholder="Search"
-                className="ml-2 outline-none bg-transparent w-32 focus:w-48 transition-all"
+                placeholder="Search product..."
+                className="ml-2 outline-none bg-transparent w-32 focus:w-48 transition-all text-sm dark:text-gray-100"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                aria-label="Search products"
               />
             </div>
           </div>
         </div>
 
-        {/* Overview Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { title: "Total Products", value: 5483, icon: <FaBox className="text-green-500" /> },
-            { title: "Orders", value: 2859, icon: <FaShoppingCart className="text-blue-500" /> },
-            { title: "Total Stock", value: 5483, icon: <FaWarehouse className="text-purple-500" /> },
-            { title: "Out of Stock", value: 38, icon: <FaExclamationCircle className="text-red-500" /> },
-          ].map((card, index) => (
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+          {summaryCards.map((card, index) => (
             <div
               key={index}
-              className="bg-white p-4 rounded-2xl shadow hover:shadow-xl transition transform hover:-translate-y-1 border-t-4 border-green-400"
+              className={`bg-white dark:bg-gray-800 p-4 rounded-2xl shadow hover:shadow-xl transition transform hover:-translate-y-1 border-t-4 ${card.borderColor}`}
             >
               <div className="flex items-center space-x-4 mb-2">
                 {card.icon}
-                <p className="text-sm text-gray-500">{card.title}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-300">{card.title}</p>
               </div>
               <p className="text-3xl font-bold">{card.value}</p>
             </div>
           ))}
         </div>
 
-        {/* All Products */}
-        <div className="bg-white p-6 rounded-2xl shadow border">
-          <h2 className="text-lg font-semibold mb-4">All Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product, index) => (
-              <div
-                key={index}
-                className="p-5 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1 bg-gradient-to-br from-white to-gray-100 relative overflow-hidden"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold text-gray-800">{product.name}</h3>
-                  <span
-                    className={`px-3 py-1 text-xs rounded-full font-semibold shadow ${
-                      product.stock > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {product.stock > 0 ? "In Stock" : "Out of Stock"}
-                  </span>
-                </div>
-                <p className="text-sm text-gray-600 mb-1">Stock: {product.stock}</p>
-                <p className="text-sm text-gray-600 mb-2">Price: ${product.price.toFixed(2)}</p>
-                <div className="absolute -top-4 -right-4 text-gray-200 opacity-10 text-7xl pointer-events-none">
-                  <FaBox />
-                </div>
-                <button className="mt-4 w-full py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 transition">
-                  View Details
-                </button>
-              </div>
-            ))}
+        {/* Contoh Chart / Visualisasi (Placeholder) */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow hover:shadow-xl transition transform hover:-translate-y-1 border-t-4 border-indigo-400">
+            <h2 className="text-lg font-semibold mb-2">Sales Overview</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              Placeholder for chart or sales data visualization
+            </p>
+            {/* Di sini Anda bisa menambahkan komponen chart dari library seperti Recharts / Chart.js */}
           </div>
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow hover:shadow-xl transition transform hover:-translate-y-1 border-t-4 border-indigo-400">
+            <h2 className="text-lg font-semibold mb-2">Revenue Overview</h2>
+            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
+              Placeholder for chart or revenue data visualization
+            </p>
+            {/* Tambahkan chart lain sesuai kebutuhan */}
+          </div>
+        </div>
+
+        {/* Filter Section */}
+        <div className="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-2xl shadow mb-6">
+          <h2 className="text-lg font-semibold">All Products</h2>
+          <div className="flex items-center space-x-2">
+            <label htmlFor="stockFilter" className="text-sm font-medium">
+              Filter:
+            </label>
+            <select
+              id="stockFilter"
+              className="border rounded px-3 py-1 text-sm bg-gray-50 dark:bg-gray-700 dark:text-gray-100"
+              value={stockFilter}
+              onChange={(e) => setStockFilter(e.target.value)}
+            >
+              <option value="all">All</option>
+              <option value="in-stock">In Stock</option>
+              <option value="out-of-stock">Out of Stock</option>
+            </select>
+          </div>
+        </div>
+
+        {/* Products Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProducts.map((product, index) => (
+            <div
+              key={index}
+              className="p-5 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1 bg-gradient-to-br from-white to-gray-100 dark:from-gray-800 dark:to-gray-700 relative overflow-hidden"
+            >
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
+                  {product.name}
+                </h3>
+                <span
+                  className={`px-3 py-1 text-xs rounded-full font-semibold shadow ${
+                    product.stock > 0
+                      ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100"
+                      : "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100"
+                  }`}
+                >
+                  {product.stock > 0 ? "In Stock" : "Out of Stock"}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">
+                Stock: {product.stock}
+              </p>
+              <p className="text-sm text-gray-600 dark:text-gray-200 mb-2">
+                Price: ${product.price.toFixed(2)}
+              </p>
+              <div className="absolute -top-4 -right-4 text-gray-200 dark:text-gray-700 opacity-10 text-7xl pointer-events-none">
+                <FaBox />
+              </div>
+              <button className="mt-4 w-full py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 transition">
+                View Details
+              </button>
+            </div>
+          ))}
         </div>
       </div>
     </div>
