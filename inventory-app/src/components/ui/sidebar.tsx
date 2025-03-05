@@ -7,13 +7,13 @@ export default function Sidebar() {  // ❌ Hapus handleLogout dari sini
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
-    { name: "Dashboard", icon: <FaChartBar />, path: "/admindashboard" },
+    { name: "Dashboard", icon: <FaChartBar />, path: "/" },
     { name: "Users", icon: <FaUsers />, path: "/users" },
-    { name: "Inventory", icon: <FaBox />, path: "/item" },
+    { name: "Inventory", icon: <FaBox />, path: "/items" },
     { name: "Category", icon: <FaThLarge />, path: "/category" },
     { name: "Area", icon: <FaMapMarkedAlt />, path: "/area" },
     { name: "Item Request", icon: <FaBoxOpen />, path: "/item-request" },
-    { name: "Repair Request", icon: <FaTools />, path: "/repair-request" }, 
+    { name: "Repair Request", icon: <FaTools />, path: "/repair-request" },
   ];
 
   return (
@@ -38,7 +38,9 @@ export default function Sidebar() {  // ❌ Hapus handleLogout dari sini
         ))}
       </nav>
 
-      <LogoutButton />
+      <div className="p-4 w-full">
+        <LogoutButton />
+      </div>
     </div>
   );
 }
