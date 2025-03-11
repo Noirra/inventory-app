@@ -8,7 +8,7 @@ export default function Sidebar() {
 
   const menuItems = [
     { name: "Dashboard", icon: <FaChartBar />, path: "/" },
-    { name: "Item Request", icon: <FaBoxOpen />, path: "/itemrequest" },
+    { name: "Item Request", icon: <FaBoxOpen />, path: "/employee-dashboard/item-request" },
   ];
 
   return (
