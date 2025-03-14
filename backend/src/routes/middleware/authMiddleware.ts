@@ -6,7 +6,6 @@ const SECRET_KEY = process.env.JWT_SECRET || "admin1234";
 export const authMiddleware = async (c: Context, next: Next) => {
     try {
         const authHeader = c.req.header("Authorization");
-
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             return c.json({ success: false, message: "Authorization header missing or invalid." }, 401);
         }

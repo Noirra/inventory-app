@@ -1,5 +1,6 @@
 import { Context } from "hono";
 import prisma from "../../prisma/client";
+import { ItemStatus } from "@prisma/client";
 
 export async function createUserItem(c: Context) {
     try {
@@ -8,6 +9,11 @@ export async function createUserItem(c: Context) {
 
         const userItem = await prisma.userItem.create({
             data: { userId, itemId }
+        });
+
+        await prisma.item.update({
+            where: { id: itemId },
+            data: { status: ItemStatus.USED }
         });
 
         return c.json({
@@ -25,20 +31,30 @@ export async function createUserItem(c: Context) {
     }
 }
 
-export async function getAllUserItems(c: Context) {
+export async function getUserItemsByUserId(c: Context) {
     try {
+        const userId = c.req.param("userId");
+
         const userItems = await prisma.userItem.findMany({
+            where: { userId },
             include: { user: true, item: true },
             orderBy: { createdAt: "desc" },
         });
 
+        if (userItems.length === 0) {
+            return c.json({
+                success: false,
+                message: "No UserItems found for this user!",
+            }, 404);
+        }
+
         return c.json({
             success: true,
-            message: "List of all UserItems!",
+            message: "List of UserItems for the user!",
             data: userItems,
         }, 200);
     } catch (e: unknown) {
-        console.error(`Error retrieving UserItems: ${e}`);
+        console.error(`Error retrieving UserItems by userId: ${e}`);
         return c.json({
             success: false,
             message: "Failed to retrieve UserItems.",
@@ -108,7 +124,14 @@ export async function deleteUserItem(c: Context) {
     try {
         const id = c.req.param("id");
 
-        await prisma.userItem.delete({ where: { id } });
+        const userItem = await prisma.userItem.delete({
+            where: { id }
+        });
+
+        await prisma.item.update({
+            where: { id: userItem.itemId },
+            data: { status: ItemStatus.UNUSED }
+        });
 
         return c.json({
             success: true,

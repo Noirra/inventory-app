@@ -10,35 +10,39 @@ import { ItemRequestRoutes } from "./routes/itemRequestRoutes";
 import { ComponentRoutes } from "./routes/itemComponentRoutes";
 import { userItemRoutes } from "./routes/userItemRoutes";
 import { authMiddleware } from "./routes/middleware/authMiddleware";
+import { GroupCodeRoutes } from "./routes/itemGroupRoutes";
 import { getRouterName, showRoutes } from 'hono/dev'
+import {cors} from "hono/cors";
 
-const app = new Hono();
+const secureRoute = new Hono();
 const JWT_SECRET = "admin123";
 
-app.route("/auth", AuthRoutes);
+secureRoute.use("*", authMiddleware);
 
-// app.use("*", authMiddleware)
-//
-// app.use("*", async (c, next) => {
-//   if (!c.req.path.startsWith("/auth")) {
-//     return jwt({ secret: JWT_SECRET })(c, next);
-//   }
-//   await next();
-// });
-
-app.get("/profile", async (c) => {
+secureRoute.get("/profile", async (c) => {
   const user = c.get("jwtPayload");
   return c.json({ user });
 });
 
-app.route("/users", UserRoutes);
-app.route("/areas", AreaRoutes);
-app.route("/categories", CategoriesRoutes);
-app.route("/items", ItemRoutes);
-app.route("/", ComponentRoutes);
-app.route("/item-request", ItemRequestRoutes);
-app.route("/user-items", userItemRoutes);
+secureRoute.route("/users", UserRoutes);
+secureRoute.route("/areas", AreaRoutes);
+secureRoute.route("/categories", CategoriesRoutes);
+secureRoute.route("/items", ItemRoutes);
+secureRoute.route("/components", ComponentRoutes);
+secureRoute.route("/item-request", ItemRequestRoutes);
+secureRoute.route("item-group", GroupCodeRoutes);
+secureRoute.route("/user-items", userItemRoutes);
+
+
+const app = new Hono();
+app.use("*", cors());
+app.route("/auth", AuthRoutes);
+app.route("/", secureRoute);
 
 showRoutes(app);
 
-export default app;
+export default {
+  port: 3000,
+  hostname: "0.0.0.0",
+  fetch: app.fetch,
+};

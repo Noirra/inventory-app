@@ -1,22 +1,24 @@
 {
   "name": "backend",
   "scripts": {
-    "dev": "bun run --hot src/index.ts"
+    "dev": "bun run --hot src/index.ts --host 0.0.0.0"
   },
   "dependencies": {
-    "@prisma/client": "^6.3.1",
+    "@prisma/client": "^6.5.0",
     "bcryptjs": "^3.0.0",
     "bun-jwt": "^1.0.1",
     "dayjs": "^1.11.13",
+    "formidable": "^3.5.2",
     "hono": "^4.7.0",
     "jsonwebtoken": "^9.0.2",
-    "prisma": "^6.3.1",
     "zod": "^3.24.2"
   },
   "devDependencies": {
     "@types/bcrypt": "^5.0.2",
     "@types/bun": "latest",
+    "@types/formidable": "^3.4.5",
     "@types/jsonwebtoken": "^9.0.8",
+    "prisma": "^6.5.0",
     "ts-node": "^10.9.2"
   },
   "prisma": {

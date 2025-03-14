@@ -57,37 +57,6 @@ export async function getItemById(c: Context) {
     }
 }
 
-export async function getItemsByGroupCode(c: Context) {
-    try {
-        const groupCode = c.req.param("groupCode");
-
-        const items = await prisma.item.findMany({
-            where: { groupCode: groupCode },
-            orderBy: { createdAt: "desc" },
-        });
-
-        if (items.length === 0) {
-            return c.json({
-                success: false,
-                message: `No items found with groupCode: ${groupCode}`,
-            }, 404);
-        }
-
-        return c.json({
-            success: true,
-            message: `List of items with groupCode: ${groupCode}`,
-            data: items,
-        }, 200);
-    } catch (e: unknown) {
-        console.error(`Error retrieving items by groupCode: ${e}`);
-        return c.json({
-            success: false,
-            message: "Failed to retrieve items by groupCode.",
-            error: e instanceof Error ? e.message : "Unknown error",
-        }, 500);
-    }
-}
-
 const saveFile = async (file: File) => {
     const buffer = await file.arrayBuffer();
     const fileName = `uploads/${Date.now()}-${file.name}`;
@@ -107,7 +76,6 @@ export async function uploadItemFiles(c: Context) {
         const photo = formData.get("photo") as File | null;
         const receipt = formData.get("receipt") as File | null;
         const examinationPeriod = parseInt(typeof body["examinationPeriod"] === "string" ? body["examinationPeriod"] : "0");
-        const groupCode = typeof body["groupCode"] === "string" ? body["groupCode"] : null;
 
         if (!categoryId || !areaId || !name || !photo || !receipt || !price) {
             return c.json({
@@ -119,7 +87,7 @@ export async function uploadItemFiles(c: Context) {
         const photoPath = await saveFile(photo);
         const receiptPath = await saveFile(receipt);
 
-        const code = randomBytes(3).toString("hex").toUpperCase();
+        const code = randomBytes(5).toString("hex").toUpperCase();
         const examinationDate = examinationPeriod > 0 ? dayjs().add(examinationPeriod * 30, "day").toISOString() : null;
 
         const item = await prisma.item.create({
@@ -132,7 +100,6 @@ export async function uploadItemFiles(c: Context) {
                 receipt: receiptPath,
                 code,
                 examinationPeriod: examinationDate,
-                groupCode,
             },
         });
 

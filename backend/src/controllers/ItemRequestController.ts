@@ -28,7 +28,7 @@ export const getItemRequests = async (c: Context) => {
 export async function createItemRequest(c: Context) {
     try {
         const user = c.get("jwtPayload");
-        const body = await c.req.parseBody();
+        const body = await c.req.json();
 
         const name = typeof body["name"] === "string" ? body["name"] : "";
         const desc = typeof body["desc"] === "string" ? body["desc"] : "";

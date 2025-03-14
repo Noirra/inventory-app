@@ -51,7 +51,7 @@ export const getCategoryById = async (c: Context) => {
 
 export const createCategory = async (c: Context) => {
     try {
-        const body = await c.req.parseBody();
+        const body = await c.req.json();
         const name = typeof body["name"] === "string" ? body["name"] : "";
         const code = typeof body["code"] === "string" ? body["code"] : "";
 
@@ -84,7 +84,7 @@ export const createCategory = async (c: Context) => {
 export const updateCategory = async (c: Context) => {
     try {
         const categoryId = c.req.param("id");
-        const body = await c.req.parseBody();
+        const body = await c.req.json();
         const name = typeof body["name"] === "string" ? body["name"] : "";
         const code = typeof body["code"] === "string" ? body["code"] : "";
 

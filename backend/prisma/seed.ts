@@ -15,6 +15,21 @@ async function main() {
         })
     );
 
+    const hashedPassword = await hash("admin1234", 10);
+
+    const user = await prisma.user.create({
+        data: {
+            name: "tester",
+            email: "tester@gmail.com",
+            password: hashedPassword,
+            roles: {
+                create: [
+                    { role: { connect: { name: "admin" } } }
+                ],
+            },
+        },
+    });
+
     console.log("Seeding completed.");
 }
 

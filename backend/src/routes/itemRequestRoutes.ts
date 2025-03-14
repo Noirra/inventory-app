@@ -4,11 +4,11 @@ import authorizeRole from "./middleware/authorizeRole";
 
 const itemRequestRouter = new Hono();
 
-itemRequestRouter.get("/", authorizeRole(["admin"]), getItemRequests);
+itemRequestRouter.get("/", getItemRequests);
 itemRequestRouter.post("/", createItemRequest);
-itemRequestRouter.patch("/:id/approve-admin", authorizeRole(["admin"]), approveAdmin);
-itemRequestRouter.patch("/:id/approve-owner", authorizeRole(["owner"]), approveOwner);
-itemRequestRouter.patch("/:id/reject", authorizeRole(["admin", "owner"]), rejectItemRequest);
-itemRequestRouter.patch("/:id/complete", authorizeRole(["admin"]), completeItemRequest);
+itemRequestRouter.patch("/:id/approve-admin", approveAdmin);
+itemRequestRouter.patch("/:id/approve-owner", approveOwner);
+itemRequestRouter.patch("/:id/reject", rejectItemRequest);
+itemRequestRouter.patch("/:id/complete", completeItemRequest);
 
 export { itemRequestRouter as ItemRequestRoutes };

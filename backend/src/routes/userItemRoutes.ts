@@ -1,10 +1,16 @@
 import { Hono } from 'hono'
-import { createUserItem, deleteUserItem, getAllUserItems, getUserItemById, updateUserItem} from '../controllers/UserItemController'
+import {
+    createUserItem,
+    deleteUserItem,
+    getUserItemById,
+    getUserItemsByUserId,
+    updateUserItem
+} from '../controllers/UserItemController'
 
 const userItemRouter = new Hono()
 
 userItemRouter.post('/', createUserItem)
-userItemRouter.get('/', getAllUserItems)
+userItemRouter.get('/user/:userId', getUserItemsByUserId)
 userItemRouter.get('/:id', getUserItemById)
 userItemRouter.patch('/:id', updateUserItem)
 userItemRouter.delete('/:id', deleteUserItem)

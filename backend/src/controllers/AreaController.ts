@@ -52,7 +52,7 @@ export async function getAreaById(c: Context) {
 
 export async function createArea(c: Context) {
     try {
-        const body = await c.req.parseBody();
+        const body = await c.req.json();
 
         const name = typeof body["name"] === "string" ? body["name"] : "";
         const code = typeof body["code"] === "string" ? body["code"] : "";
@@ -86,7 +86,7 @@ export async function createArea(c: Context) {
 export async function updateArea(c: Context) {
     try {
         const areaId = c.req.param("id");
-        const body = await c.req.parseBody();
+        const body = await c.req.json();
 
         const name = typeof body["name"] === "string" ? body["name"] : "";
         const code = typeof body["code"] === "string" ? body["code"] : "";

@@ -60,7 +60,7 @@ export async function getComponentById(c: Context) {
 export async function createComponent(c: Context) {
     try {
         const itemId = c.req.param("itemId");
-        const body = await c.req.parseBody();
+        const body = await c.req.json();
         const name = typeof body["name"] === "string" ? body["name"] : undefined;
         const photo = typeof body["photo"] === "string" ? body["photo"] : undefined;
 
@@ -96,7 +96,7 @@ export async function updateComponent(c: Context) {
     try {
         const itemId = c.req.param("itemId");
         const componentId = c.req.param("componentId");
-        const body = await c.req.parseBody();
+        const body = await c.req.json();
 
         const existingComponent = await prisma.component.findFirst({
             where: { id: componentId, itemId },
