@@ -7,6 +7,20 @@ export async function createUserItem(c: Context) {
         const body = await c.req.json();
         const { userId, itemId } = body;
 
+        if (!userId || !itemId) {
+            return c.json({ success: false, message: "User ID and Item ID are required!" }, 400);
+        }
+
+        const userExists = await prisma.user.findUnique({ where: { id: userId } });
+        if (!userExists) {
+            return c.json({ success: false, message: "User not found!" }, 404);
+        }
+
+        const itemExists = await prisma.item.findUnique({ where: { id: itemId } });
+        if (!itemExists) {
+            return c.json({ success: false, message: "Item not found!" }, 404);
+        }
+
         const userItem = await prisma.userItem.create({
             data: { userId, itemId }
         });
@@ -34,6 +48,10 @@ export async function createUserItem(c: Context) {
 export async function getUserItemsByUserId(c: Context) {
     try {
         const userId = c.req.param("userId");
+
+        if (!userId) {
+            return c.json({ success: false, message: "User ID is required!" }, 400);
+        }
 
         const userItems = await prisma.userItem.findMany({
             where: { userId },
@@ -63,46 +81,19 @@ export async function getUserItemsByUserId(c: Context) {
     }
 }
 
-export async function getUserItemById(c: Context) {
-    try {
-        const id = c.req.param("id");
-
-        const userItem = await prisma.userItem.findUnique({
-            where: { id },
-            include: { user: true, item: true },
-        });
-
-        if (!userItem) {
-            return c.json({
-                success: false,
-                message: "UserItem not found!",
-            }, 404);
-        }
-
-        return c.json({
-            success: true,
-            message: "UserItem details retrieved successfully!",
-            data: userItem,
-        }, 200);
-    } catch (e: unknown) {
-        console.error(`Error retrieving UserItem: ${e}`);
-        return c.json({
-            success: false,
-            message: "Failed to retrieve UserItem.",
-            error: e instanceof Error ? e.message : "Unknown error",
-        }, 500);
-    }
-}
-
 export async function updateUserItem(c: Context) {
     try {
         const id = c.req.param("id");
         const body = await c.req.json();
         const { userId, itemId } = body;
 
+        if (!userId || !itemId) {
+            return c.json({ success: false, message: "User ID and Item ID are required!" }, 400);
+        }
+
         const updatedUserItem = await prisma.userItem.update({
-            where: { id },
-            data: { userId, itemId },
+            where: { id, userId },
+            data: { itemId },
         });
 
         return c.json({
