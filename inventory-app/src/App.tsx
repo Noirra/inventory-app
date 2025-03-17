@@ -3,6 +3,8 @@ import SignIn from "./view/login/SignIn";
 import AdminDashboard from "./view/admin/dashboard";
 import AdminUser from "./view/admin/user/index";
 import AdminUserItem from "./view/admin/useritem/index";
+import CreateUserItem from "./view/admin/useritem/create";
+import EditUserItem from "./view/admin/useritem/edit";
 import CreateUser from "./view/admin/user/create";
 import EditUser from "./view/admin/user/edit";
 import AreaCategory from "./view/admin/area/index";
@@ -41,6 +43,8 @@ function App() {
               <Route path="users/create" element={<CreateUser />} />
               <Route path="users/edit/:userId" element={<EditUser />} />
               <Route path="users/useritem/:userId" element={<AdminUserItem />} />
+              <Route path="users/:userId/useritem/create" element={<CreateUserItem />} />
+              <Route path="users/:userId/useritem/edit/:userItemId" element={<EditUserItem />} />
               <Route path="area" element={<AreaCategory />} />
               <Route path="area/create" element={<CreateArea />} />
               <Route path="area/edit/:areaId" element={<EditArea />} />
