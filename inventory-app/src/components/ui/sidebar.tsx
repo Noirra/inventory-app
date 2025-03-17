@@ -1,19 +1,18 @@
 import { useState } from "react";
-import { FaBars, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaBoxOpen, FaTools } from "react-icons/fa";
+import { FaBars, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaBoxOpen,  } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import LogoutButton from "@/components/ui/logoutbutton";
 
-export default function Sidebar() {  // ❌ Hapus handleLogout dari sini
+export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
-    { name: "Dashboard", icon: <FaChartBar />, path: "/" },
-    { name: "Users", icon: <FaUsers />, path: "/users" },
-    { name: "Inventory", icon: <FaBox />, path: "/items" },
-    { name: "Category", icon: <FaThLarge />, path: "/category" },
-    { name: "Area", icon: <FaMapMarkedAlt />, path: "/area" },
-    { name: "Item Request", icon: <FaBoxOpen />, path: "/item-request" },
-    { name: "Repair Request", icon: <FaTools />, path: "/repair-request" },
+    { name: "Dashboard", icon: <FaChartBar />, path: "/admin-dashboard" },
+    { name: "Users", icon: <FaUsers />, path: "/admin-dashboard/users" },
+    { name: "Inventory", icon: <FaBox />, path: "/admin-dashboard/items" },
+    { name: "Category", icon: <FaThLarge />, path: "/admin-dashboard/category" },
+    { name: "Area", icon: <FaMapMarkedAlt />, path: "/admin-dashboard/area" },
+    { name: "Item Request", icon: <FaBoxOpen />, path: "/admin-dashboard/item-request" },
   ];
 
   return (
