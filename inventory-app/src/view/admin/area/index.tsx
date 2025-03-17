@@ -5,6 +5,8 @@ import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Pagination from "@/components/ui/pagination";
 import Notification from "@/components/ui/notification";
+import fetchWithAuth from "@/utils/fetchInterceptor";
+
 
 interface Area {
   id: string;
@@ -26,8 +28,14 @@ export default function AdminArea() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/areas`);
-      const responseToJson = await response.json();
+      const responseToJson = await fetchWithAuth("/areas"); // Sudah JSON
+      console.log("Parsed JSON:", responseToJson);
+  
+      // Sesuaikan dengan struktur response API
+      if (!responseToJson || !responseToJson.success) {
+        throw new Error(`API error! Message: ${responseToJson?.message || "Unknown error"}`);
+      }
+  
       setAreas(responseToJson.data);
     } catch (error) {
       console.error("Error fetching areas:", error);
@@ -71,7 +79,7 @@ export default function AdminArea() {
 
     if (confirmDelete.isConfirmed) {
       try {
-        await fetch(`${import.meta.env.VITE_BASE_URL}/areas/${id}`, { method: "DELETE" });
+        await fetchWithAuth(`/areas/${id}`, { method: "DELETE" });
         fetchData();
         Swal.fire("Deleted!", "Area has been deleted.", "success");
       } catch (error) {

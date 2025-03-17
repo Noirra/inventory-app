@@ -9,7 +9,6 @@ const getAuthToken = (): string | null => {
 const fetchWithAuth = async (endpoint: string, options: FetchOptions = {}): Promise<any> => {
     const token = getAuthToken();
     const headers: HeadersInit = {
-        "Content-Type": "application/json",
         ...(token && { Authorization: `Bearer ${token}` }),
         ...options.headers,
     };

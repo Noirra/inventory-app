@@ -5,6 +5,7 @@ import Pagination from "@/components/ui/pagination";
 import Notification from "@/components/ui/notification";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import fetchWithAuth from "@/utils/fetchInterceptor";
 
 interface Categories {
   id: string;
@@ -24,17 +25,24 @@ export default function AdminCategory() {
     setMessage("");
   };
 
-  const fetchData = async () => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/categories`);
-      const responseToJson = await response.json();
-      setCategories(responseToJson.data);
-    } catch (error) {
-      console.error("Error fetching categories:", error);
-    } finally {
-      setLoading(false);
-    }
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+          const responseToJson = await fetchWithAuth("/categories");
+          console.log("Fetched categories:", responseToJson);
+
+          if (Array.isArray(responseToJson.data)) {
+            setCategories(responseToJson.data);
+        } else {
+            console.error("Unexpected response format:", responseToJson);
+            setCategories([]);
+        }
+      } catch (error) {
+          console.error("Error fetching user:", error);
+          setCategories([]);
+      } finally {
+          setLoading(false);
+      }
   };
 
   useEffect(() => {
@@ -73,7 +81,7 @@ export default function AdminCategory() {
 
     if (confirmDelete.isConfirmed) {
       try {
-        await fetch(`${import.meta.env.VITE_BASE_URL}/categories/${id}`, { method: "DELETE" });
+        await fetchWithAuth(`/categories/${id}`, { method: "DELETE" });
         fetchData();
         Swal.fire("Deleted!", "Category has been deleted.", "success");
       } catch (error) {

@@ -5,6 +5,7 @@ import Pagination from "@/components/ui/pagination";
 import Notification from "@/components/ui/notification";
 import { Link, useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
+import fetchWithAuth from "@/utils/fetchInterceptor";
 
 interface User {
   id: string;
@@ -29,15 +30,22 @@ export default function AdminUser() {
   const fetchData = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/users`);
-      const responseToJson = await response.json();
-      setUsers(responseToJson.users);
+        const responseToJson = await fetchWithAuth("/users");
+        console.log("Fetched users:", responseToJson);
+
+        if (Array.isArray(responseToJson.users)) {
+            setUsers(responseToJson.users);
+        } else {
+            console.error("Unexpected response format:", responseToJson);
+            setUsers([]);
+        }
     } catch (error) {
-      console.error("Error fetching user:", error);
+        console.error("Error fetching user:", error);
+        setUsers([]);
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
-  };
+};
 
   useEffect(() => {
     fetchData();
@@ -74,7 +82,7 @@ export default function AdminUser() {
 
     if (confirmDelete.isConfirmed) {
       try {
-        await fetch(`${import.meta.env.VITE_BASE_URL}/users/${id}`, { method: "DELETE" });
+        await fetchWithAuth(`/users/${id}`, { method: "DELETE" });
         fetchData();
         Swal.fire("Deleted!", "User has been deleted.", "success");
       } catch (error) {
@@ -84,7 +92,7 @@ export default function AdminUser() {
     }
   };
 
-  const filteredUsers = users.filter(user =>
+  const filteredUsers = (users || []).filter(user =>
     user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
     user.role?.toLowerCase().includes(searchQuery.toLowerCase())
@@ -126,7 +134,6 @@ export default function AdminUser() {
                 <th className="p-3 border">No</th>
                 <th className="p-3 border">Name</th>
                 <th className="p-3 border">Email</th>
-                <th className="p-3 border">Role</th>
                 <th className="p-3 border">Actions</th>
               </tr>
             </thead>
@@ -140,13 +147,12 @@ export default function AdminUser() {
                   <tr key={user.id} className="border">
                     <td className="p-3 border text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td
-                      className="p-3 border text-center text-blue-600 cursor-pointer hover:underline"
-                      onClick={() => navigate(`/users/useritem/${user.id}`)}
-                    >
+                      className="p-3 border text-center cursor-pointer hover:underline"
+                      onClick={() => navigate(`/admin-dashboard/users/useritem/${user.id}`)}
+                    ><span className="text-blue-600">
                       {user.name}
-                    </td>
+                    </span></td>
                     <td className="p-3 border text-center">{user.email}</td>
-                    <td className="p-3 border text-center">{user.role}</td>
                     <td className="p-3 border text-center space-x-2">
                       <Link to={`/users/edit/${user.id}`} title="Edit User">
                         <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
