@@ -58,7 +58,6 @@ export default function CreateItemRequest() {
             <textarea name="desc" placeholder="Description" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
             <input type="text" name="priceRange" placeholder="Price Range" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
             <input type="url" name="referenceLink" placeholder="Reference Link" onChange={handleChange} className="border p-2 rounded-lg w-full" />
-            <input type="text" name="code" placeholder="Item Code" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
             <div className="col-span-2 flex justify-end">
               <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600">
                 <FaSave /> <span>Save Item</span>
