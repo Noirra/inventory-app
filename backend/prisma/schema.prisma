@@ -81,7 +81,8 @@ model Item {
   receipt           String
   status            ItemStatus      @default(UNUSED)
   code              String          @unique
-  examinationPeriod String?
+  examinationPeriodDate String?
+  examinationPeriodMonth Int?
   components        Component[]
   userItems         UserItem[]
   itemGroups        ItemGroup[]

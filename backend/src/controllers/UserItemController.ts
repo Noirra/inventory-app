@@ -16,9 +16,9 @@ export async function createUserItem(c: Context) {
             return c.json({ success: false, message: "User not found!" }, 404);
         }
 
-        const itemExists = await prisma.item.findUnique({ where: { id: itemId } });
-        if (!itemExists) {
-            return c.json({ success: false, message: "Item not found!" }, 404);
+        const existingUserItem = await prisma.userItem.findFirst({ where: { itemId } });
+        if (existingUserItem) {
+            return c.json({ success: false, message: "Item already assigned to another user!" }, 400);
         }
 
         const userItem = await prisma.userItem.create({
@@ -48,7 +48,6 @@ export async function createUserItem(c: Context) {
 export async function getUserItemsByUserId(c: Context) {
     try {
         const userId = c.req.param("userId");
-
         if (!userId) {
             return c.json({ success: false, message: "User ID is required!" }, 400);
         }
@@ -91,9 +90,14 @@ export async function updateUserItem(c: Context) {
             return c.json({ success: false, message: "User ID and Item ID are required!" }, 400);
         }
 
+        const existingUserItem = await prisma.userItem.findFirst({ where: { itemId, NOT: { id } } });
+        if (existingUserItem) {
+            return c.json({ success: false, message: "Item already assigned to another user!" }, 400);
+        }
+
         const updatedUserItem = await prisma.userItem.update({
-            where: { id, userId },
-            data: { itemId },
+            where: { id },
+            data: { userId, itemId },
         });
 
         return c.json({

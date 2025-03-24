@@ -99,7 +99,8 @@ export async function uploadItemFiles(c: Context) {
                 photo: photoPath,
                 receipt: receiptPath,
                 code,
-                examinationPeriod: examinationDate,
+                examinationPeriodDate: examinationDate,
+                examinationPeriodMonth: examinationPeriod,
             },
         });
 
@@ -134,13 +135,17 @@ export async function updateItemFiles(c: Context) {
         }
 
         const categoryId = typeof body["categoryId"] === "string" ? body["categoryId"] : existingItem.categoryId;
+        // return c.json({categoryId})
         const areaId = typeof body["areaId"] === "string" ? body["areaId"] : existingItem.areaId;
         const photo = formData.get("photo") as File | null;
         const receipt = formData.get("receipt") as File | null;
+        const examinationPeriod = parseInt(typeof body["examinationPeriod"] === "string" ? body["examinationPeriod"] : existingItem.examinationPeriodMonth?.toString() || "0");
 
         const updatedData: any = {
             categoryId,
             areaId,
+            examinationPeriodMonth: examinationPeriod,
+            examinationPeriodDate: examinationPeriod > 0 ? dayjs().add(examinationPeriod * 30, "day").toISOString() : null,
         };
 
         if (photo) updatedData.photo = await saveFile(photo);
@@ -211,14 +216,14 @@ export async function getUpcomingExaminations(c: Context) {
 
         const items = await prisma.item.findMany({
             where: {
-                examinationPeriod: {
+                examinationPeriodDate: {
                     not: null,
                 },
             },
         });
 
         const upcomingExaminations = items.filter((item) => {
-            const examinationDate = dayjs(item.examinationPeriod);
+            const examinationDate = dayjs(item.examinationPeriodDate);
             return examinationDate.isAfter(today) && examinationDate.isBefore(oneWeekAhead);
         });
 
@@ -232,6 +237,31 @@ export async function getUpcomingExaminations(c: Context) {
         return c.json({
             success: false,
             message: "Failed to retrieve upcoming examinations.",
+            error: e instanceof Error ? e.message : "Unknown error",
+        }, 500);
+    }
+}
+
+export async function getUnusedItems(c: Context) {
+    try {
+        const items = await prisma.item.findMany({
+            where: {
+                status: ItemStatus.UNUSED,
+                userItems: { none: {} }
+            },
+            orderBy: { createdAt: "desc" },
+        });
+
+        return c.json({
+            success: true,
+            message: "List of unused items!",
+            data: items,
+        }, 200);
+    } catch (e: unknown) {
+        console.error(`Error retrieving unused items: ${e}`);
+        return c.json({
+            success: false,
+            message: "Failed to retrieve unused items.",
             error: e instanceof Error ? e.message : "Unknown error",
         }, 500);
     }
