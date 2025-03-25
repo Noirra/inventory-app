@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { FaBars, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaBoxOpen,  } from "react-icons/fa";
+import { FaBars, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaBoxOpen, FaTags } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import LogoutButton from "@/components/ui/logoutbutton";
 
@@ -10,6 +10,7 @@ export default function Sidebar() {
     { name: "Dashboard", icon: <FaChartBar />, path: "/admin-dashboard" },
     { name: "Users", icon: <FaUsers />, path: "/admin-dashboard/users" },
     { name: "Inventory", icon: <FaBox />, path: "/admin-dashboard/items" },
+    { name: "Group Code", icon: <FaTags />, path: "/admin-dashboard/groupcode" },
     { name: "Category", icon: <FaThLarge />, path: "/admin-dashboard/category" },
     { name: "Area", icon: <FaMapMarkedAlt />, path: "/admin-dashboard/area" },
     { name: "Item Request", icon: <FaBoxOpen />, path: "/admin-dashboard/item-request" },
