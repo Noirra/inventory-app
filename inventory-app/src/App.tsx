@@ -15,8 +15,14 @@ import CreateCategory from "./view/admin/category/create";
 import EditCategory from "./view/admin/category/edit";
 import AdminItem from "./view/admin/item/index";
 import AdminItems from "./view/admin/komponen/index";
+import CreateComponent from "./view/admin/komponen/create";
+import EditComponent from "./view/admin/komponen/edit";
 import CreateItem from "./view/admin/item/create";
 import EditItem from "./view/admin/item/edit";
+import AdminGroupCode from "./view/admin/groupcode/index";
+import CreateGroupCode from "./view/admin/groupcode/create";
+import AdminGroupItem from "./view/admin/groupitem/index";
+import CreateGroupitem from "./view/admin/groupitem/create";
 import ItemRequest from "./view/admin/item-request/index";
 import CreateItemRequest from "./view/employee/item-request/create";
 import RepairRequest from "./view/admin/repair-request/index";
@@ -55,10 +61,16 @@ function App() {
               <Route path="items/create" element={<CreateItem />} />
               <Route path="items/edit/:itemId" element={<EditItem />} />
               <Route path="items/komponen/:itemId" element={<AdminItems />} />
+              <Route path="items/:itemId/komponen/create" element={<CreateComponent />} />
+              <Route path="items/:itemId/komponen/edit/:componentId" element={<EditComponent />} />
               <Route path="item-request" element={<ItemRequest />} />
               <Route path="repair-request" element={<RepairRequest />} />
               <Route path="repair-request/create" element={<CreateRepairRequest />} />
               <Route path="repair-request/edit/:itemId" element={<EditRepairRequest />} />
+              <Route path="groupcode" element={<AdminGroupCode />} />
+              <Route path="groupcode/create" element={<CreateGroupCode />} />
+              <Route path="groupcode/groupitem/:groupId" element={<AdminGroupItem />} />
+              <Route path="groupcode/:groupId/groupitem/create" element={<CreateGroupitem />} />
             </Routes>
           </ProtectedRoute>
         } />
