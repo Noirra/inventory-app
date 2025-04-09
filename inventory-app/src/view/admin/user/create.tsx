@@ -2,6 +2,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { FaArrowLeft, FaSave, } from "react-icons/fa";
 import Sidebar from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
+import fetchWithAuth from "@/utils/fetchInterceptor";
 
 export default function CreateUser() {
   const navigate = useNavigate();
@@ -19,15 +20,13 @@ export default function CreateUser() {
     e.preventDefault();
   
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/users`, {
+      const response = await fetchWithAuth("/users", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
         body: JSON.stringify(user),
       });
   
-      const result = await response.json();
+      const result = await response;
+      console.log(result)
   
       if (!response.ok) {
         throw new Error(result.message || "Gagal menambahkan user");

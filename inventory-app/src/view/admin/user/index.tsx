@@ -122,7 +122,7 @@ export default function AdminUser() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button
-              onClick={() => navigate("/users/create")}
+              onClick={() => navigate("/admin-dashboard/users/create")}
               className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             >
               <FaPlus /> <span>Add User</span>
