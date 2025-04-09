@@ -47,6 +47,24 @@ export default function ItemRequestEmployee() {
 
   useEffect(() => {
     fetchData();
+  
+    const params = new URLSearchParams(window.location.search);
+    const successMessage = params.get("success");
+    if (successMessage) {
+      const message =
+        successMessage === "created"
+          ? "Item added successfully!"
+          : successMessage === "updated"
+          ? "Item updated successfully!"
+          : "";
+  
+      if (message) {
+        setMessage(message);
+        setTimeout(() => setMessage(""), 3000);
+  
+        navigate("/employee-dashboard/item-request", { replace: true });
+      }
+    }
   }, []);
 
   const filteredItems = items.filter(item =>
@@ -89,43 +107,43 @@ export default function ItemRequestEmployee() {
             </button>
           </div>
           <table className="w-full border-collapse border">
-            <thead>
-              <tr className="bg-gray-200">
-                <th className="p-3 border">Code</th>
-                <th className="p-3 border">Name</th>
-                <th className="p-3 border">Description</th>
-                <th className="p-3 border">Price Range</th>
-                <th className="p-3 border">Status</th>
-              </tr>
-            </thead>
-            <tbody>
-              {loading ? (
-                <tr>
-                  <td colSpan={6} className="p-3 text-center text-gray-500">
-                    Loading data...
-                  </td>
-                </tr>
-              ) : displayedItems.length > 0 ? (
-                displayedItems.map((item) => (
-                  <tr key={item.id} className="border">
-                    <td className="p-3 border text-center">{item.code}</td>
-                    <td className="p-3 border text-center">
-                      {item.name}
-                    </td>
-                    <td className="p-3 border text-center">{item.desc}</td>
-                    <td className="p-3 border text-center">{item.priceRange}</td>
-                    <td className="p-3 border text-center">{item.status}</td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="p-3 text-center text-gray-500">
-                    No item requests found.
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+  <thead>
+    <tr className="bg-gray-200">
+      <th className="p-3 border">No.</th>
+      <th className="p-3 border">Name</th>
+      <th className="p-3 border">Description</th>
+      <th className="p-3 border">Price Range</th>
+      <th className="p-3 border">Status</th>
+    </tr>
+  </thead>
+  <tbody>
+    {loading ? (
+      <tr>
+        <td colSpan={5} className="p-3 text-center text-gray-500">
+          Loading data...
+        </td>
+      </tr>
+    ) : displayedItems.length > 0 ? (
+      displayedItems.map((item, index) => (
+        <tr key={item.id} className="border">
+          <td className="p-3 border text-center">
+            {(currentPage - 1) * itemsPerPage + index + 1}
+          </td>
+          <td className="p-3 border text-center">{item.name}</td>
+          <td className="p-3 border text-center">{item.desc}</td>
+          <td className="p-3 border text-center">{item.priceRange}</td>
+          <td className="p-3 border text-center">{item.status}</td>
+        </tr>
+      ))
+    ) : (
+      <tr>
+        <td colSpan={5} className="p-3 text-center text-gray-500">
+          No item requests found.
+        </td>
+      </tr>
+    )}
+  </tbody>
+</table>
           <div className="mt-4">
             <Pagination currentPage={currentPage} totalPages={totalPages} changePage={setCurrentPage} />
           </div>
