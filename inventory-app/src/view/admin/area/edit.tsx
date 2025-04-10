@@ -2,6 +2,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { FaArrowLeft, FaSave, } from "react-icons/fa";
 import Sidebar from "@/components/ui/sidebar";
 import { useNavigate, useParams } from "react-router-dom";
+import fetchWithAuth from "@/utils/fetchInterceptor";
 
 export default function EditArea() {
   const { areaId } = useParams<{ areaId: string }>();
@@ -15,18 +16,21 @@ export default function EditArea() {
   useEffect(() => {
     const fetchArea = async () => {
       try {
-        const response = await fetch(`${import.meta.env.VITE_BASE_URL}/areas/${areaId}`); 
-        const data = await response.json();
-
-        setArea({
-          name: data.data.name,
-          code: data.data.code
-        })
+        const data = await fetchWithAuth(`/areas/${areaId}`);
+  
+        if (data && data.data) {
+          setArea({
+            name: data.data.name,
+            code: data.data.code,
+          });
+        } else {
+          console.warn("Area data is missing or malformed:", data);
+        }
       } catch (error) {
         console.error("Failed to fetch area:", error);
       }
     };
-
+  
     fetchArea();
   }, [areaId]);
 
@@ -38,7 +42,7 @@ export default function EditArea() {
     e.preventDefault();
   
     try {
-      const response = await fetch(`${import.meta.env.VITE_BASE_URL}/areas/${areaId}`, {
+      const data = await fetchWithAuth(`/areas/${areaId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
@@ -46,11 +50,11 @@ export default function EditArea() {
         body: JSON.stringify(area),
       });
   
-      if (!response.ok) {
-        throw new Error("Failed to update area");
+      if (!data.success) {
+        throw new Error(data.message || "Failed to update area");
       }
   
-      navigate("/area?success=updated");
+      navigate("/admin-dashboard/area?success=updated");
     } catch (error) {
       console.error("Failed to update area:", error);
     }
@@ -64,7 +68,7 @@ export default function EditArea() {
       {/* Main Content */}
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow border p-6">
-          <button onClick={() => navigate("/area")} className="mb-4 flex items-center text-blue-500 hover:underline">
+          <button onClick={() => navigate("/admin-dashboard/area")} className="mb-4 flex items-center text-blue-500 hover:underline">
             <FaArrowLeft className="mr-2" /> Back
           </button>
           <h2 className="text-xl font-semibold mb-4">Edit Area</h2>

@@ -60,7 +60,7 @@ export default function AdminArea() {
       if (message) {
         setMessage(message);
         setTimeout(() => setMessage(""), 3000);
-        navigate("/area", { replace: true });
+        navigate("/admin-dashboard/area", { replace: true });
       }
     }
   }, []);
@@ -118,7 +118,7 @@ export default function AdminArea() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button
-              onClick={() => navigate("/area/create")}
+              onClick={() => navigate("/admin-dashboard/area/create")}
               className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             >
               <FaPlus /> <span>Add Area</span>
@@ -145,7 +145,7 @@ export default function AdminArea() {
                     <td className="p-3 border text-center">{area.name}</td>
                     <td className="p-3 border text-center">{area.code}</td>
                     <td className="p-3 border text-center space-x-2">
-                      <Link to={`/area/edit/${area.id}`}>
+                      <Link to={`/admin-dashboard/area/edit/${area.id}`}>
                         <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
                           <FaEdit />
                         </button>
