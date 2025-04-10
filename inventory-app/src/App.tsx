@@ -31,6 +31,8 @@ import EditRepairRequest from "./view/admin/repair-request/edit";
 import EmployeeDashboard from "./view/employee/dashboard";
 import ItemRequestEmployee from "./view/employee/item-request";
 import OwnerDashboard from "./view/owner/dashboard";
+import ItemRequestOwner from "./view/owner/item-request/index";
+import OwnerItem from "./view/owner/items/index";
 import ProtectedRoute from "./middleware/protectedroute";
 
 function App() {
@@ -79,17 +81,21 @@ function App() {
         <Route path="/employee-dashboard/*" element={
           <ProtectedRoute requiredRole="employee">
             <Routes>
-        <Route index element={<EmployeeDashboard />} />
-        <Route path="item-request" element={<ItemRequestEmployee />} />
-        <Route path="item-request/create" element={<CreateItemRequest />} />
-        </Routes>
+              <Route index element={<EmployeeDashboard />} />
+              <Route path="item-request" element={<ItemRequestEmployee />} />
+              <Route path="item-request/create" element={<CreateItemRequest />} />
+            </Routes>
           </ProtectedRoute>
         } />
 
         {/* Owner Dashboard */}
-        <Route path="/owner-dashboard" element={
+        <Route path="/owner-dashboard/*" element={
           <ProtectedRoute requiredRole="owner">
-            <OwnerDashboard />
+            <Routes>
+              <Route index element={<OwnerDashboard />} />
+              <Route path="item-request" element={<ItemRequestOwner />} />
+              <Route path="items" element={<OwnerItem />} />
+            </Routes>
           </ProtectedRoute>
         } />
 

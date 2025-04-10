@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import Sidebar from "@/components/ui/sidebar";
+import Sidebar from "@/components/sidebar/owner";
 import { FaSearch, FaBox, FaShoppingCart, FaExclamationCircle, FaUsers } from "react-icons/fa";
 
 const products = [
