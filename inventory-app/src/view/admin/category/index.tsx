@@ -62,7 +62,7 @@ export default function AdminCategory() {
       if (message) {
         setMessage(message);
         setTimeout(() => setMessage(""), 3000);
-        navigate("/category", { replace: true });
+        navigate("/admin-dashboard/category", { replace: true });
       }
     }
   }, []);
@@ -127,7 +127,7 @@ export default function AdminCategory() {
             />
 
             <button
-              onClick={() => navigate("/category/create")}
+              onClick={() => navigate("/admin-dashboard/category/create")}
               className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             >
               <FaPlus /> <span>Add Category</span>
@@ -158,7 +158,7 @@ export default function AdminCategory() {
                     <td className="p-3 border text-center">{category.name}</td>
                     <td className="p-3 border text-center">{category.code}</td>
                     <td className="p-3 border text-center space-x-2">
-                      <Link to={`/category/edit/${category.id}`} title="Edit Category">
+                      <Link to={`/admin-dashboard/category/edit/${category.id}`} title="Edit Category">
                         <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
                           <FaEdit />
                         </button>
