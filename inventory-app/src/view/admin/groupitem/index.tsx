@@ -53,7 +53,7 @@ export default function AdminGroupItem() {
       if (messages[successMessage]) {
         setMessage(messages[successMessage]);
         setTimeout(() => setMessage(""), 3000);
-        navigate(`/admin-dashboard/groupcode/${groupId}`, { replace: true });
+        navigate(`/admin-dashboard/groupcode/groupitem/${groupId}`, { replace: true });
       }
     }
   }, [groupId]);

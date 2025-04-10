@@ -44,7 +44,7 @@ export default function CreateGroupCode() {
         return;
       }
 
-      navigate(`/admin-dashboard/groupcode/${groupId}?success=created`);
+      navigate(`/admin-dashboard/groupcode/groupitem/${groupId}?success=created`);
     } catch (error: any) {
       alert(error.message || "An error occurred");
     }
