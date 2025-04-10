@@ -77,7 +77,7 @@ export default function EditItem() {
         body: formData,
       });
        console.log(response)
-      navigate("/items?success=updated");
+      navigate("/admin-dashboard/items?success=updated");
     } catch (error) {
       console.error("Failed to update item:", error);
     }

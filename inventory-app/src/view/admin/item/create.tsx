@@ -70,7 +70,7 @@ export default function CreateItem() {
           body: formData,
         });
       }
-      // navigate("/admin-dashboard/items?success=created");
+      navigate("/admin-dashboard/items?success=created");
     } catch (error) {
       console.error("Error submitting item:", error);
       alert("Terjadi kesalahan");
