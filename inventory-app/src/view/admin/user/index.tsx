@@ -64,7 +64,7 @@ export default function AdminUser() {
       if (message) {
         setMessage(message);
         setTimeout(() => setMessage(""), 3000);
-        navigate("/user", { replace: true });
+        navigate("/admin-dashboard/users", { replace: true });
       }
     }
   }, []);
@@ -154,7 +154,7 @@ export default function AdminUser() {
                     </span></td>
                     <td className="p-3 border text-center">{user.email}</td>
                     <td className="p-3 border text-center space-x-2">
-                      <Link to={`/users/edit/${user.id}`} title="Edit User">
+                      <Link to={`/admin-dashboard/users/edit/${user.id}`} title="Edit User">
                         <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
                           <FaEdit />
                         </button>
