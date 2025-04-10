@@ -135,8 +135,9 @@ export async function updateItemFiles(c: Context) {
         }
 
         const categoryId = typeof body["categoryId"] === "string" ? body["categoryId"] : existingItem.categoryId;
-        // return c.json({categoryId})
         const areaId = typeof body["areaId"] === "string" ? body["areaId"] : existingItem.areaId;
+        const name = typeof body["name"] === "string" ? body["name"] : existingItem.name;
+        const price = parseInt(typeof body["price"] === "string" ? body["price"] : existingItem.price.toString());
         const photo = formData.get("photo") as File | null;
         const receipt = formData.get("receipt") as File | null;
         const examinationPeriod = parseInt(typeof body["examinationPeriod"] === "string" ? body["examinationPeriod"] : existingItem.examinationPeriodMonth?.toString() || "0");
@@ -144,6 +145,8 @@ export async function updateItemFiles(c: Context) {
         const updatedData: any = {
             categoryId,
             areaId,
+            name,
+            price,
             examinationPeriodMonth: examinationPeriod,
             examinationPeriodDate: examinationPeriod > 0 ? dayjs().add(examinationPeriod * 30, "day").toISOString() : null,
         };

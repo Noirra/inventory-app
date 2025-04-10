@@ -3,7 +3,6 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-// Membuat GroupCode (Hanya Mengisi Name)
 export async function createGroupCode(c: Context) {
     try {
         const { name } = await c.req.json();
@@ -16,10 +15,15 @@ export async function createGroupCode(c: Context) {
     }
 }
 
-// Menghapus GroupCode dan ItemGroup terkait
 export async function deleteGroupCode(c: Context) {
     try {
         const groupCodeId = c.req.param("id");
+
+        // Cek apakah GroupCode ada
+        const existingGroup = await prisma.groupCode.findUnique({ where: { id: groupCodeId } });
+        if (!existingGroup) return c.json({ success: false, message: "GroupCode not found!" }, 404);
+
+        // Hapus semua item terkait sebelum menghapus groupCode
         await prisma.itemGroup.deleteMany({ where: { groupId: groupCodeId } });
         await prisma.groupCode.delete({ where: { id: groupCodeId } });
 
@@ -29,7 +33,6 @@ export async function deleteGroupCode(c: Context) {
     }
 }
 
-// Mendapatkan Semua GroupCode
 export async function getAllGroupCodes(c: Context) {
     try {
         const groupCodes = await prisma.groupCode.findMany();
@@ -39,25 +42,51 @@ export async function getAllGroupCodes(c: Context) {
     }
 }
 
-// Melihat Item di dalam GroupCode
 export async function getItemsByGroupCode(c: Context) {
     try {
-        const groupCodeId = c.req.param("id");
+        const groupCodeId = c.req.param("groupCodeId");
+
+        const existingGroup = await prisma.groupCode.findUnique({
+            where: { id: groupCodeId }
+        });
+
+        if (!existingGroup) {
+            return c.json({ success: false, message: "GroupCode not found!" }, 404);
+        }
+
         const items = await prisma.itemGroup.findMany({
             where: { groupId: groupCodeId },
             include: { item: true }
         });
 
-        return c.json({ success: true, message: "Items in GroupCode", data: items.map(i => i.item) }, 200);
+        return c.json({
+            success: true,
+            message: "Items in GroupCode",
+            data: items.map(i => i.item)
+        }, 200);
+
     } catch (e) {
-        return c.json({ success: false, message: "Failed to retrieve items.", error: (e as Error).message }, 500);
+        return c.json({
+            success: false,
+            message: "Failed to retrieve items.",
+            error: (e as Error).message
+        }, 500);
     }
 }
 
-// Menambahkan Item ke GroupCode
+
 export async function addItemToGroupCode(c: Context) {
     try {
         const { itemId, groupCodeId } = await c.req.json();
+
+        // Cek apakah item dan groupCode ada
+        const itemExists = await prisma.item.findUnique({ where: { id: itemId } });
+        const groupExists = await prisma.groupCode.findUnique({ where: { id: groupCodeId } });
+
+        if (!itemExists || !groupExists) {
+            return c.json({ success: false, message: "Item or GroupCode not found." }, 404);
+        }
+
         const existing = await prisma.itemGroup.findFirst({ where: { itemId, groupId: groupCodeId } });
 
         if (existing) return c.json({ success: false, message: "Item already exists in this GroupCode." }, 400);
@@ -69,14 +98,33 @@ export async function addItemToGroupCode(c: Context) {
     }
 }
 
-// Menghapus Item dari GroupCode
 export async function removeItemFromGroupCode(c: Context) {
     try {
-        const { itemId, groupCodeId } = await c.req.json();
-        await prisma.itemGroup.deleteMany({ where: { itemId, groupId: groupCodeId } });
+        const itemId = c.req.param("itemId");
+        const groupCodeId = c.req.param("groupCodeId");
+
+        // Cek apakah GroupCode dan Item ada sebelum menghapus
+        const existingGroup = await prisma.groupCode.findUnique({ where: { id: groupCodeId } });
+        const existingItem = await prisma.item.findUnique({ where: { id: itemId } });
+
+        if (!existingGroup || !existingItem) {
+            return c.json({ success: false, message: "Item or GroupCode not found!" }, 404);
+        }
+
+        const deleted = await prisma.itemGroup.deleteMany({
+            where: { itemId, groupId: groupCodeId }
+        });
+
+        if (deleted.count === 0) {
+            return c.json({ success: false, message: "Item is not in this GroupCode." }, 400);
+        }
 
         return c.json({ success: true, message: "Item removed from GroupCode!" }, 200);
     } catch (e) {
-        return c.json({ success: false, message: "Failed to remove item from GroupCode.", error: (e as Error).message }, 500);
+        return c.json({
+            success: false,
+            message: "Failed to remove item from GroupCode.",
+            error: (e as Error).message
+        }, 500);
     }
 }

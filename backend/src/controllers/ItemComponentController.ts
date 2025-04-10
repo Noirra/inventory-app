@@ -1,6 +1,7 @@
 import { Context } from "hono";
 import prisma from "../../prisma/client";
 import { randomBytes } from "crypto";
+import {writeFile} from "fs/promises";
 
 export async function getComponentsByItemId(c: Context) {
     try {
@@ -57,14 +58,21 @@ export async function getComponentById(c: Context) {
     }
 }
 
+const saveFile = async (file: File) => {
+    const buffer = await file.arrayBuffer();
+    const fileName = `uploads/${Date.now()}-${file.name}`;
+    await writeFile(fileName, Buffer.from(buffer));
+    return fileName;
+};
+
 export async function createComponent(c: Context) {
     try {
         const itemId = c.req.param("itemId");
-        const body = await c.req.json();
-        const name = typeof body["name"] === "string" ? body["name"] : undefined;
-        const photo = typeof body["photo"] === "string" ? body["photo"] : undefined;
+        const formData = await c.req.formData();
+        const name = formData.get("name");
+        const photo = formData.get("photo") as File | null;
 
-        if (!name || !photo) {
+        if (!name || typeof name !== "string" || !photo) {
             return c.json({
                 success: false,
                 message: "Name and photo are required.",
@@ -72,9 +80,10 @@ export async function createComponent(c: Context) {
         }
 
         const code = randomBytes(3).toString("hex").toUpperCase();
+        const photoPath = await saveFile(photo);
 
         const component = await prisma.component.create({
-            data: { itemId, name, photo, code },
+            data: { itemId, name, photo: photoPath, code },
         });
 
         return c.json({
@@ -96,7 +105,9 @@ export async function updateComponent(c: Context) {
     try {
         const itemId = c.req.param("itemId");
         const componentId = c.req.param("componentId");
-        const body = await c.req.json();
+        const formData = await c.req.formData();
+        const name = formData.get("name");
+        const photo = formData.get("photo") as File | null;
 
         const existingComponent = await prisma.component.findFirst({
             where: { id: componentId, itemId },
@@ -109,11 +120,16 @@ export async function updateComponent(c: Context) {
             }, 404);
         }
 
+        let photoPath = existingComponent.photo;
+        if (photo) {
+            photoPath = await saveFile(photo);
+        }
+
         const updatedComponent = await prisma.component.update({
             where: { id: componentId },
             data: {
-                name: typeof body["name"] === "string" ? body["name"] : existingComponent.name,
-                photo: typeof body["photo"] === "string" ? body["photo"] : existingComponent.photo,
+                name: typeof name === "string" ? name : existingComponent.name,
+                photo: photoPath,
             },
         });
 

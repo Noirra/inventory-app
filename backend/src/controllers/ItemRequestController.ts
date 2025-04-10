@@ -4,25 +4,43 @@ import { randomBytes } from "crypto";
 import { Status } from "@prisma/client";
 
 export const getItemRequests = async (c: Context) => {
-    try {
-        const user = c.get("jwtPayload");
-        const itemRequests = await prisma.itemRequest.findMany({
+    const user = c.get("jwtPayload");
+
+    let itemRequests;
+
+    if (user.roles[0] === "admin") {
+        itemRequests = await prisma.itemRequest.findMany({
             orderBy: { createdAt: "desc" },
         });
-
-        return c.json({
-            success: true,
-            message: "List of Item Requests!",
-            data: itemRequests,
-        }, 200);
-    } catch (e: unknown) {
-        console.error(`Error getting item requests: ${e}`);
+    } else if (user.roles[0] === "employee") {
+        itemRequests = await prisma.itemRequest.findMany({
+            where: { userId: user.id },
+            orderBy: { createdAt: "desc" },
+        });
+    } else if (user.roles[0] === "owner") {
+        itemRequests = await prisma.itemRequest.findMany({
+            where: {
+                id: {
+                    in: (await prisma.requestApproved.findMany({
+                        select: { requestId: true },
+                    })).map((req) => req.requestId),
+                },
+            },
+            orderBy: { createdAt: "desc" },
+        });
+    } else {
+        // Unauthorized role
         return c.json({
             success: false,
-            message: "Failed to retrieve item requests.",
-            error: e instanceof Error ? e.message : "Unknown error",
-        }, 500);
+            message: "Unauthorized access",
+        }, 403);
     }
+
+    return c.json({
+        success: true,
+        message: "List of Item Requests!",
+        data: itemRequests,
+    }, 200);
 };
 
 export async function createItemRequest(c: Context) {

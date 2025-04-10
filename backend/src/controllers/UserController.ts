@@ -7,11 +7,27 @@ const prisma = new PrismaClient();
 export const getUsers = async (c: Context) => {
     try {
         const users = await prisma.user.findMany({
-            include: { roles: { include: { role: true } } },
+            where: {
+                roles: {
+                    some: {
+                        role: {
+                            name: "employee",
+                        },
+                    },
+                },
+            },
+            include: {
+                roles: {
+                    include: {
+                        role: true,
+                    },
+                },
+            },
         });
 
         return c.json({ success: true, users }, 200);
     } catch (error) {
+        console.error("Error fetching users:", error);
         return c.json({ success: false, error: "Internal Server Error" }, 500);
     }
 };
