@@ -7,7 +7,7 @@ export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const menuItems = [
-    { name: "Dashboard", icon: <FaChartBar />, path: "/" },
+    { name: "Dashboard", icon: <FaChartBar />, path: "/employee-dashboard" },
     { name: "Item Request", icon: <FaBoxOpen />, path: "/employee-dashboard/item-request" },
   ];
 
