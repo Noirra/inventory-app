@@ -141,3 +141,29 @@ export async function deleteUserItem(c: Context) {
         }, 500);
     }
 }
+
+export async function getUnusedItems(c: Context) {
+    try {
+        const items = await prisma.item.findMany({
+            where: {
+                status: ItemStatus.UNUSED
+            },
+            orderBy: {
+                name: "asc"
+            }
+        });
+
+        return c.json({
+            success: true,
+            message: "List of unused items",
+            data: items
+        }, 200);
+    } catch (e: unknown) {
+        console.error(`Error retrieving unused items: ${e}`);
+        return c.json({
+            success: false,
+            message: "Failed to retrieve unused items.",
+            error: e instanceof Error ? e.message : "Unknown error",
+        }, 500);
+    }
+}

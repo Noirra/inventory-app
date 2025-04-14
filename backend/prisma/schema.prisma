@@ -137,7 +137,7 @@ model ItemRequest {
   name          String
   desc          String
   priceRange    String
-  referenceLink String
+  referenceLink String            @db.Text
   code          String            @unique
   status        Status            @default(PENDING)
   approvals     RequestApproved[]
