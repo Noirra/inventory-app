@@ -1,12 +1,12 @@
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/ui/sidebar";
 import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import Swal from "sweetalert2";
 import Pagination from "@/components/ui/pagination";
 import Notification from "@/components/ui/notification";
 import fetchWithAuth from "@/utils/fetchInterceptor";
-
+import CreateArea from "@/view/admin/area/create";
 
 interface Area {
   id: string;
@@ -22,7 +22,8 @@ export default function AdminArea() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [showModal, setShowModal] = useState(false);
+  const [areaToEdit, setAreaToEdit] = useState<Area | null>(null); // Untuk menyimpan area yang akan diedit
   const handleCloseNotification = () => setMessage("");
 
   const fetchData = async () => {
@@ -30,12 +31,12 @@ export default function AdminArea() {
     try {
       const responseToJson = await fetchWithAuth("/areas"); // Sudah JSON
       console.log("Parsed JSON:", responseToJson);
-  
+
       // Sesuaikan dengan struktur response API
       if (!responseToJson || !responseToJson.success) {
         throw new Error(`API error! Message: ${responseToJson?.message || "Unknown error"}`);
       }
-  
+
       setAreas(responseToJson.data);
     } catch (error) {
       console.error("Error fetching areas:", error);
@@ -54,8 +55,8 @@ export default function AdminArea() {
         successMessage === "created"
           ? "Area added successfully!"
           : successMessage === "updated"
-          ? "Area updated successfully!"
-          : "";
+            ? "Area updated successfully!"
+            : "";
 
       if (message) {
         setMessage(message);
@@ -64,7 +65,6 @@ export default function AdminArea() {
       }
     }
   }, []);
-
 
   const deleteArea = async (id: string) => {
     const confirmDelete = await Swal.fire({
@@ -101,6 +101,11 @@ export default function AdminArea() {
 
   const totalPages = Math.ceil(filteredAreas.length / itemsPerPage);
 
+  const handleEditClick = (area: Area) => {
+    setAreaToEdit(area); // Set area yang akan diedit
+    setShowModal(true);  // Tampilkan modal
+  };
+
   return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
@@ -118,7 +123,7 @@ export default function AdminArea() {
               onChange={(e) => setSearchQuery(e.target.value)}
             />
             <button
-              onClick={() => navigate("/admin-dashboard/area/create")}
+              onClick={() => setShowModal(true)}
               className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
             >
               <FaPlus /> <span>Add Area</span>
@@ -145,11 +150,12 @@ export default function AdminArea() {
                     <td className="p-3 border text-center">{area.name}</td>
                     <td className="p-3 border text-center">{area.code}</td>
                     <td className="p-3 border text-center space-x-2">
-                      <Link to={`/admin-dashboard/area/edit/${area.id}`}>
-                        <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
-                          <FaEdit />
-                        </button>
-                      </Link>
+                      <button
+                        onClick={() => handleEditClick(area)} // Tombol untuk edit
+                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                      >
+                        <FaEdit />
+                      </button>
                       <button
                         onClick={() => deleteArea(area.id)}
                         className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
@@ -169,6 +175,17 @@ export default function AdminArea() {
           <div className="mt-4">
             <Pagination currentPage={currentPage} totalPages={totalPages} changePage={setCurrentPage} />
           </div>
+          {showModal && (
+            <CreateArea
+              area={areaToEdit} // Pass area yang akan diedit ke modal
+              onClose={() => setShowModal(false)}
+              onSuccess={() => {
+                fetchData();
+                setMessage(areaToEdit ? "Area updated successfully!" : "Area added successfully!");
+                setTimeout(() => setMessage(""), 3000);
+              }}
+            />
+          )}
         </div>
       </div>
     </div>
