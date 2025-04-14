@@ -164,7 +164,7 @@ export default function ItemRequestAdmin() {
                             ? "text-green-600"
                             : item.status === "REJECTED"
                               ? "text-red-600"
-                              : "text-yellow-600"
+                              : "text-gray-500"
                           }`}
                       >
                         {item.status}
