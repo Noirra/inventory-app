@@ -13,7 +13,7 @@ interface Item {
   status: string;
 }
 
-export default function ItemRequest() {
+export default function ItemRequestAdmin() {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -38,7 +38,7 @@ export default function ItemRequest() {
   };
 
   const approveItem = async (id: string) => {
-    const confirmApprove = await Swal.fire({
+    const confirm = await Swal.fire({
       title: "Approve this request?",
       text: "You are about to approve this item request.",
       icon: "question",
@@ -48,16 +48,60 @@ export default function ItemRequest() {
       confirmButtonText: "Yes, approve it!",
     });
 
-    if (confirmApprove.isConfirmed) {
+    if (confirm.isConfirmed) {
       try {
         await fetchWithAuth(`/item-request/${id}/approve-admin`, { method: "PATCH" });
-
         setMessage("Item request approved successfully!");
         await fetchData();
-
       } catch (error) {
         console.error("Failed to approve item request:", error);
         Swal.fire("Error", "Failed to approve item request.", "error");
+      }
+    }
+  };
+
+  const rejectItem = async (id: string) => {
+    const confirm = await Swal.fire({
+      title: "Reject this request?",
+      text: "You are about to reject this item request.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, reject it!",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await fetchWithAuth(`/item-request/${id}/reject`, { method: "PATCH" });
+        setMessage("Item request rejected successfully!");
+        await fetchData();
+      } catch (error) {
+        console.error("Failed to reject item request:", error);
+        Swal.fire("Error", "Failed to reject item request.", "error");
+      }
+    }
+  };
+
+  const completeItem = async (id: string) => {
+    const confirm = await Swal.fire({
+      title: "Complete this request?",
+      text: "You are about to Complete this item request.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#ffc107",
+      confirmButtonText: "Yes, Complete it!",
+    });
+
+    if (confirm.isConfirmed) {
+      try {
+        await fetchWithAuth(`/item-request/${id}/complete`, { method: "PATCH" });
+        setMessage("Item request complete successfully!");
+        await fetchData();
+      } catch (error) {
+        console.error("Failed to complete item request:", error);
+        Swal.fire("Error", "Failed to complete item request.", "error");
       }
     }
   };
@@ -115,20 +159,45 @@ export default function ItemRequest() {
                     <td className="p-3 border text-center">{item.desc}</td>
                     <td className="p-3 border text-center">{item.priceRange}</td>
                     <td className="p-3 border text-center">
-                      <span className="text-red-600 font-semibold">{item.status}</span>
+                      <span
+                        className={`font-semibold ${item.status === "APPROVED"
+                            ? "text-green-600"
+                            : item.status === "REJECTED"
+                              ? "text-red-600"
+                              : "text-yellow-600"
+                          }`}
+                      >
+                        {item.status}
+                      </span>
                     </td>
                     <td className="p-3 border text-center">
                       {item.status === "PENDING" ? (
+                        <div className="flex justify-center gap-2">
+                          <button
+                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                            onClick={() => approveItem(item.id)}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
+                            onClick={() => rejectItem(item.id)}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : item.status === "APPROVED" ? (
                         <button
-                          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
-                          onClick={() => approveItem(item.id)}
+                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
+                          onClick={() => completeItem(item.id)}
                         >
-                          Approve
+                          Complete
                         </button>
                       ) : (
-                        <span className="text-gray-400">Approved</span>
+                        <span className="text-gray-400 italic">No actions</span>
                       )}
                     </td>
+
                   </tr>
                 ))
               ) : (
