@@ -30,6 +30,7 @@ export default function AdminItem() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
+    console.log('api')
     setLoading(true);
     try {
       const response = await fetchWithAuth("/items");

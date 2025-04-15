@@ -99,7 +99,15 @@ export default function AdminItems() {
                   <tr key={item.id} className="border">
                     <td className="p-3 border text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td className="p-3 border text-center">{item.name}</td>
-                    <td className="p-3 border text-center">{item.photo || "No Photo"}</td>
+                    <td className="p-3 border text-center">
+                      {item?.photo && (
+                        <img
+                          src={`https://inventory.bariqfirjatullah.my.id/${item.photo}`}
+                          alt="Component"
+                          className="mx-auto h-16 w-16 object-cover rounded"
+                        />
+                      )}
+                    </td>
                     <td className="p-3 border text-center space-x-2">
                       <Link to={`/admin-dashboard/items/${itemId}/komponen/edit/${item.id}`}>
                         <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
