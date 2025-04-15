@@ -1,33 +1,50 @@
-import { useState, ChangeEvent, FormEvent, useEffect } from "react";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { FaSave } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import Notification from "@/components/ui/notification";
 import fetchWithAuth from "@/utils/fetchInterceptor";
 
-interface CreateAreaProps {
-  area: { id?: string; name: string; code: string } | null;
-  onClose: () => void;
-  onSuccess: () => void;
+interface Area {
+  id: string;
+  code: string;
+  name: string;
 }
 
-export default function CreateArea({ area, onClose, onSuccess }: CreateAreaProps) {
-  const [formData, setFormData] = useState({ name: "", code: "" });
+interface CreateAreaModalProps {
+  onClose: () => void;
+  onSuccess: () => void;
+  area: Area | null;
+  modalType: "create" | "edit";
+}
+
+const CreateAreaModal: React.FC<CreateAreaModalProps> = ({
+  onClose,
+  onSuccess,
+  area,
+  modalType,
+}) => {
+  const [formData, setFormData] = useState<Area>({
+    id: "",
+    code: "",
+    name: "",
+  });
   const [isVisible, setIsVisible] = useState(false);
   const [message, setMessage] = useState("");
-  const [loading, setLoading] = useState(false); // Tambahkan state loading
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    if (area) {
-      setFormData({ name: area.name, code: area.code });
+    if (modalType === "edit" && area) {
+      setFormData(area);
     } else {
-      setFormData({ name: "", code: "" });
+      setFormData({ id: "", code: "", name: "" });
     }
     setTimeout(() => setIsVisible(true), 10);
-  }, [area]);
+  }, [area, modalType]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
   const handleClose = () => {
@@ -41,61 +58,47 @@ export default function CreateArea({ area, onClose, onSuccess }: CreateAreaProps
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    setLoading(true); // Set loading true ketika submit
+    setLoading(true);
 
     try {
-      let result;
-      if (area && area.id) {
-        result = await fetchWithAuth(`/areas/${area.id}`, {
-          method: "PATCH",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-      } else {
-        result = await fetchWithAuth("/areas", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        });
-      }
+      const method = modalType === "edit" ? "PATCH" : "POST";
+      const url = modalType === "edit" ? `/areas/${formData.id}` : "/areas";
 
-      if (!result.ok) {
+      const result = await fetchWithAuth(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      if (!result.ok && !result.data) {
         throw new Error(result.message || "Gagal menyimpan area");
       }
 
-      setMessage(area ? "Area berhasil diperbarui!" : "Area berhasil dibuat!");
-      onSuccess();
+      setMessage(modalType === "edit" ? "Area berhasil diperbarui!" : "Area berhasil dibuat!");
+      setTimeout(() => setMessage(""), 2000);
 
-      setTimeout(() => setMessage(""), 3000);
-
-      setIsVisible(false);
       setTimeout(() => {
-        onClose();
-        navigate('/admin-dashboard/area', { replace: true });
-        window.location.reload();
-      }, 250);
-
+        onSuccess(); // refresh data dan tutup modal
+      }, 500);
     } catch (error: any) {
       setMessage(error.message || "Terjadi kesalahan");
-      setTimeout(() => setMessage(""), 3000);
     } finally {
-      setLoading(false); // Set loading false setelah proses selesai
+      setLoading(false);
     }
   };
 
   return (
     <>
-      <Notification message={message} onClose={handleCloseNotification} />
 
-      <div className={`fixed inset-0 z-50 bg-black/20 backdrop-blur-sm flex items-center justify-center transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}>
-        <div className={`bg-white rounded-2xl shadow-lg p-6 w-full max-w-md transform transition-all duration-200 ${isVisible ? "scale-100" : "scale-95"}`}>
-          <h2 className="text-xl font-semibold mb-4">{area ? "Edit Area" : "Create New Area"}</h2>
+      <div className={`fixed inset-0 flex justify-center items-center bg-black/20 backdrop-blur-sm transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}>
+        <div className={`bg-white rounded-2xl shadow-lg p-6 max-w-md w-full transform transition-all duration-200 ${isVisible ? "scale-100" : "scale-95"}`}>
+          <h2 className="text-xl font-semibold mb-4">{modalType === "create" ? "Create New Area" : "Edit Area"}</h2>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div>
               <label htmlFor="name" className="block text-sm font-medium text-gray-700">Area Name</label>
               <input
-                id="name"
                 type="text"
+                id="name"
                 name="name"
                 placeholder="Area Name"
                 value={formData.name}
@@ -105,10 +108,10 @@ export default function CreateArea({ area, onClose, onSuccess }: CreateAreaProps
               />
             </div>
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700">Area Code (Max 3)</label>
+              <label htmlFor="code" className="block text-sm font-medium text-gray-700">Area Code</label>
               <input
-                id="code"
                 type="text"
+                id="code"
                 name="code"
                 maxLength={3}
                 placeholder="Area Code"
@@ -129,10 +132,10 @@ export default function CreateArea({ area, onClose, onSuccess }: CreateAreaProps
               <button
                 type="submit"
                 className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600 disabled:opacity-50"
-                disabled={loading} 
+                disabled={loading}
               >
-                <FaSave /> 
-                <span>{loading ? "Saving..." : area ? "Update Area" : "Save Area"}</span>
+                <FaSave />
+                <span>{loading ? "Saving..." : modalType === "create" ? "Save Area" : "Update Area"}</span>
               </button>
             </div>
           </form>
@@ -140,4 +143,6 @@ export default function CreateArea({ area, onClose, onSuccess }: CreateAreaProps
       </div>
     </>
   );
-}
+};
+
+export default CreateAreaModal;

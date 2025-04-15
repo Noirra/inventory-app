@@ -11,7 +11,7 @@ interface Category {
 
 interface CreateCategoryModalProps {
   onClose: () => void;
-  onSuccess: () => Promise<void>;
+  onSuccess: () => void;
   category: Category | null;
   modalType: "create" | "edit";
 }
@@ -59,35 +59,29 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setLoading(true);
-  
+
     try {
-      let result;
       const method = modalType === "edit" ? "PATCH" : "POST";
       const url = modalType === "edit" ? `/categories/${formData.id}` : "/categories";
-  
-      result = await fetchWithAuth(url, {
+
+      const result = await fetchWithAuth(url, {
         method,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData),
       });
-  
-      if (!result.ok) {
+
+      if (!result.ok && !result.data) {
         throw new Error(result.message || "Gagal menyimpan kategori");
       }
-  
-      setMessage(modalType === "edit" ? "Category berhasil diperbarui!" : "Category berhasil dibuat!");
-      await onSuccess();
-  
-      setTimeout(() => setMessage(""), 3000);
-  
-      setIsVisible(false);
+
+      setMessage(modalType === "edit" ? "Kategori berhasil diperbarui!" : "Kategori berhasil dibuat!");
+      setTimeout(() => setMessage(""), 2000);
+
       setTimeout(() => {
-        onClose();
-      }, 250);
-  
+        onSuccess();
+      }, 500);
     } catch (error: any) {
       setMessage(error.message || "Terjadi kesalahan");
-      setTimeout(() => setMessage(""), 3000);
     } finally {
       setLoading(false);
     }
@@ -95,19 +89,36 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
 
   return (
     <>
-      <Notification message={message} onClose={handleCloseNotification} />
+      {message && (
+        <Notification message={message} onClose={handleCloseNotification} />
+      )}
 
-      <div className={`fixed inset-0 flex justify-center items-center bg-black/20 backdrop-blur-sm transition-opacity duration-200 ${isVisible ? "opacity-100" : "opacity-0"}`}>
-        <div className={`bg-white rounded-2xl shadow-lg p-6 max-w-md w-full transform transition-all duration-200 ${isVisible ? "scale-100" : "scale-95"}`}>
-          <h2 className="text-xl font-semibold mb-4">{modalType === "create" ? "Create New Category" : "Edit Category"}</h2>
+      <div
+        className={`fixed inset-0 flex justify-center items-center bg-black/20 backdrop-blur-sm transition-opacity duration-200 ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <div
+          className={`bg-white rounded-2xl shadow-lg p-6 max-w-md w-full transform transition-all duration-200 ${
+            isVisible ? "scale-100" : "scale-95"
+          }`}
+        >
+          <h2 className="text-xl font-semibold mb-4">
+            {modalType === "create" ? "Buat Kategori Baru" : "Edit Kategori"}
+          </h2>
           <form onSubmit={handleSubmit} className="grid gap-4">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-700">Category Name</label>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Nama Kategori
+              </label>
               <input
                 type="text"
                 id="name"
                 name="name"
-                placeholder="Category Name"
+                placeholder="Nama Kategori"
                 value={formData.name}
                 onChange={handleChange}
                 className="border p-2 rounded-lg w-full"
@@ -115,12 +126,18 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
               />
             </div>
             <div>
-              <label htmlFor="code" className="block text-sm font-medium text-gray-700">Category Code</label>
+              <label
+                htmlFor="code"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Kode Kategori
+              </label>
               <input
                 type="text"
                 id="code"
                 name="code"
-                placeholder="Category Code"
+                maxLength={3}
+                placeholder="Kode"
                 value={formData.code}
                 onChange={handleChange}
                 className="border p-2 rounded-lg w-full"
@@ -133,7 +150,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
                 onClick={handleClose}
                 className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
               >
-                Cancel
+                Batal
               </button>
               <button
                 type="submit"
@@ -141,7 +158,13 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
                 disabled={loading}
               >
                 <FaSave />
-                <span>{loading ? "Saving..." : modalType === "create" ? "Save Category" : "Update Category"}</span>
+                <span>
+                  {loading
+                    ? "Menyimpan..."
+                    : modalType === "create"
+                    ? "Simpan Kategori"
+                    : "Perbarui Kategori"}
+                </span>
               </button>
             </div>
           </form>
