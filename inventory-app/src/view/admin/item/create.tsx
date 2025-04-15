@@ -6,6 +6,7 @@ import fetchWithAuth from "@/utils/fetchInterceptor";
 
 export default function CreateItem() {
   const navigate = useNavigate();
+
   const [items, setItems] = useState([
     {
       categoryId: "",
@@ -18,6 +19,11 @@ export default function CreateItem() {
       receipt: null as File | null,
     },
   ]);
+
+  const [imagePreviews, setImagePreviews] = useState<
+    { photo: string | null; receipt: string | null }[]
+  >([{ photo: null, receipt: null }]);
+
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [areas, setAreas] = useState<{ id: string; name: string }[]>([]);
 
@@ -39,18 +45,29 @@ export default function CreateItem() {
   const handleChange = (index: number, e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, type, value, files } = e.target as HTMLInputElement;
     const updatedItems = [...items];
-    updatedItems[index] = {
-      ...updatedItems[index],
-      [name]: type === "file" && files ? files[0] : value,
-    };
+    const updatedPreviews = [...imagePreviews];
+
+    if (type === "file" && files && files[0]) {
+      updatedItems[index] = { ...updatedItems[index], [name]: files[0] };
+
+      const previewUrl = URL.createObjectURL(files[0]);
+      if (name === "photo") {
+        updatedPreviews[index] = { ...updatedPreviews[index], photo: previewUrl };
+      } else if (name === "receipt") {
+        updatedPreviews[index] = { ...updatedPreviews[index], receipt: previewUrl };
+      }
+    } else {
+      updatedItems[index] = { ...updatedItems[index], [name]: value };
+    }
+
     setItems(updatedItems);
+    setImagePreviews(updatedPreviews);
   };
-
-
 
   const handleDeleteItem = (index: number) => {
     if (items.length > 1) {
       setItems(items.filter((_, i) => i !== index));
+      setImagePreviews(imagePreviews.filter((_, i) => i !== index));
     }
   };
 
@@ -76,18 +93,17 @@ export default function CreateItem() {
       alert("Terjadi kesalahan");
     }
   };
-  
-  return (
 
+  return (
     <div className="flex h-screen bg-gray-100">
       <Sidebar />
       <div className="flex-1 p-6">
         <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow border p-6 relative">
-        <div className="flex justify-between items-center mb-4">
-  <button onClick={() => navigate("/admin-dashboard/items")} className="flex items-center text-blue-500 hover:underline">
-    <FaArrowLeft className="mr-2" /> Back
-  </button>
-</div>
+          <div className="flex justify-between items-center mb-4">
+            <button onClick={() => navigate("/admin-dashboard/items")} className="flex items-center text-blue-500 hover:underline">
+              <FaArrowLeft className="mr-2" /> Back
+            </button>
+          </div>
 
           <h2 className="text-xl font-semibold mb-4">Create New Item</h2>
 
@@ -162,33 +178,62 @@ export default function CreateItem() {
                     />
                   </div>
                   <div>
-                  <label className="block font-semibold">Price</label>
-                  <input
-                    type="number"
-                    name="price"
-                    value={item.price}
-                    onChange={(e) => handleChange(index, e)}
-                    className="border p-2 rounded-lg w-full"
-                    required
-                  />
-                </div>
+                    <label className="block font-semibold">Price</label>
+                    <input
+                      type="number"
+                      name="price"
+                      value={item.price}
+                      onChange={(e) => handleChange(index, e)}
+                      className="border p-2 rounded-lg w-full"
+                      required
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4 mt-4">
                   <div>
                     <label className="block font-semibold">Photo</label>
-                    <input type="file" name="photo" accept="image/*" onChange={(e) => handleChange(index, e)} className="border p-2 rounded-lg w-full" />
+                    <input
+                      type="file"
+                      name="photo"
+                      accept="image/*"
+                      onChange={(e) => handleChange(index, e)}
+                      className="border p-2 rounded-lg w-full"
+                    />
+                    {imagePreviews[index]?.photo && (
+                      <img
+                        src={imagePreviews[index].photo!}
+                        alt="Photo Preview"
+                        className="mt-2 rounded border h-40 object-contain"
+                      />
+                    )}
                   </div>
                   <div>
                     <label className="block font-semibold">Receipt</label>
-                    <input type="file" name="receipt" accept="image/*" onChange={(e) => handleChange(index, e)} className="border p-2 rounded-lg w-full" />
+                    <input
+                      type="file"
+                      name="receipt"
+                      accept="image/*"
+                      onChange={(e) => handleChange(index, e)}
+                      className="border p-2 rounded-lg w-full"
+                    />
+                    {imagePreviews[index]?.receipt && (
+                      <img
+                        src={imagePreviews[index].receipt!}
+                        alt="Receipt Preview"
+                        className="mt-2 rounded border h-40 object-contain"
+                      />
+                    )}
                   </div>
                 </div>
               </div>
             ))}
 
             <div className="flex justify-end space-x-4">
-              <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600">
+              <button
+                type="submit"
+                className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600"
+              >
                 <FaSave /> <span>Save Item</span>
               </button>
             </div>
@@ -197,4 +242,4 @@ export default function CreateItem() {
       </div>
     </div>
   );
-};
+}

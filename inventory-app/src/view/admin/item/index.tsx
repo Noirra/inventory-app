@@ -119,7 +119,14 @@ export default function AdminItem() {
                   <tr key={item.id} className="border">
                     <td className="p-3 border text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td className="p-3 border text-center cursor-pointer hover:underline" onClick={() => navigate(`/admin-dashboard/items/komponen/${item.id}`)}><span className="text-blue-600">{item.name}</span></td>
-                    <td className="p-3 border text-center">${item.price}</td>
+                    <td className="p-3 border text-center">
+  {new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(item.price)}
+</td>
+
                     <td className="p-3 border text-center">
                       <span
                         className={`px-3 py-1 rounded-full text-xs font-semibold ${item.status === "UNUSED" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"}`}
