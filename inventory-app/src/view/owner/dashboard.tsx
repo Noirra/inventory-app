@@ -23,7 +23,7 @@ export default function OwnerDashboard() {
       <Sidebar  />
       <div className="flex-1 p-6 overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Welcome Admin!</h1>
+          <h1 className="text-2xl font-semibold">Welcome Owner!</h1>
           <div className="flex items-center space-x-4">
             <div className="flex items-center border rounded-full px-4 py-2 shadow-sm bg-white">
               <FaSearch className="text-gray-500" />
