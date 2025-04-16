@@ -3,7 +3,11 @@ import { useNavigate } from "react-router-dom";
 import { FaSignOutAlt } from "react-icons/fa";
 import Swal from "sweetalert2";
 
-const LogoutButton: React.FC = () => {
+interface LogoutButtonProps {
+    sidebarOpen: boolean;
+  }
+
+const LogoutButton: React.FC<LogoutButtonProps> = ({ sidebarOpen })=> {
     const navigate = useNavigate();
 
     const handleLogout = async () => {
@@ -25,11 +29,11 @@ const LogoutButton: React.FC = () => {
 
     return (
         <button
-            onClick={handleLogout}
-            className="w-full flex items-center space-x-2 bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 shadow"
+          onClick={handleLogout}
+          className="w-full flex items-center bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition duration-300 shadow justify-center"
         >
-            <FaSignOutAlt />
-            <span>Logout</span>
+          <FaSignOutAlt />
+          {sidebarOpen && <span className="ml-2">Logout</span>}
         </button>
     );
 };
