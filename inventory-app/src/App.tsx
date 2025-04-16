@@ -8,10 +8,10 @@ import EditUserItem from "./view/admin/useritem/edit";
 import CreateUser from "./view/admin/user/create";
 import EditUser from "./view/admin/user/edit";
 import AreaCategory from "./view/admin/area/index";
-import CreateArea from "./view/admin/area/create";
-import EditArea from "./view/admin/area/edit";
+// import CreateArea from "./view/admin/area/create";
+// import EditArea from "./view/admin/area/edit";
 import AdminCategory from "./view/admin/category/index";
-import CreateCategory from "./view/admin/category/create";
+// import CreateCategory from "./view/admin/category/create";
 import EditCategory from "./view/admin/category/edit";
 import AdminItem from "./view/admin/item/index";
 import AdminItems from "./view/admin/komponen/index";
@@ -33,6 +33,7 @@ import ItemRequestEmployee from "./view/employee/item-request";
 import OwnerDashboard from "./view/owner/dashboard";
 import ItemRequestOwner from "./view/owner/item-request/index";
 import OwnerItem from "./view/owner/items/index";
+import OwnerUser from "./view/owner/user/index";
 import ProtectedRoute from "./middleware/protectedroute";
 
 function App() {
@@ -54,10 +55,10 @@ function App() {
               <Route path="users/:userId/useritem/create" element={<CreateUserItem />} />
               <Route path="users/:userId/useritem/edit/:userItemId" element={<EditUserItem />} />
               <Route path="area" element={<AreaCategory />} />
-              <Route path="area/create" element={<CreateArea />} />
-              <Route path="area/edit/:areaId" element={<EditArea />} />
+              {/* <Route path="area/create" element={<CreateArea />} />
+              <Route path="area/edit/:areaId" element={<EditArea />} /> */}
               <Route path="category" element={<AdminCategory />} />
-              <Route path="category/create" element={<CreateCategory />} />
+              {/* <Route path="category/create" element={<CreateCategory />} /> */}
               <Route path="category/edit/:categoryId" element={<EditCategory />} />
               <Route path="items" element={<AdminItem />} />
               <Route path="items/create" element={<CreateItem />} />
@@ -95,6 +96,7 @@ function App() {
               <Route index element={<OwnerDashboard />} />
               <Route path="item-request" element={<ItemRequestOwner />} />
               <Route path="items" element={<OwnerItem />} />
+              <Route path="users" element={<OwnerUser />} />
             </Routes>
           </ProtectedRoute>
         } />
