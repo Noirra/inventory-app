@@ -115,6 +115,17 @@ export default function AdminUserItem() {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-semibold">User Items Management</h1>
         </div>
+        <nav className="flex items-center text-sm text-gray-500 mb-4 space-x-2">
+          <Link to="/admin-dashboard" className="hover:text-blue-600 transition-colors">
+            Dashboard
+          </Link>
+          <span>/</span>
+          <Link to="/admin-dashboard/users" className="hover:text-blue-600 transition-colors">
+          User
+          </Link>
+          <span>/</span>
+          <span className="text-gray-800 font-medium">User Items</span>
+        </nav>
         <div className="bg-white p-6 rounded-2xl shadow border">
           <h2 className="text-lg font-semibold mb-4">User Item List</h2>
           <Notification message={message} onClose={handleCloseNotification} />
