@@ -18,8 +18,11 @@ export default function EditItem() {
     status: "UNUSED",
     groupCode: "",
   });
+
   const [photo, setPhoto] = useState<File | null>(null);
   const [receipt, setReceipt] = useState<File | null>(null);
+  const [photoBeforeUrl, setPhotoBeforeUrl] = useState<string | null>(null);
+  const [receiptBeforeUrl, setReceiptBeforeUrl] = useState<string | null>(null);
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [areas, setAreas] = useState<{ id: string; name: string }[]>([]);
 
@@ -38,13 +41,15 @@ export default function EditItem() {
           groupCode: itemData.data.groupCode || "",
         });
 
+        // Set image preview
+        setPhotoBeforeUrl(`https://inventory.bariqfirjatullah.my.id/${itemData.data.photo}`);
+        setReceiptBeforeUrl(`https://inventory.bariqfirjatullah.my.id/${itemData.data.receipt}`);
+
         const categoriesData = await fetchWithAuth("/categories");
         setCategories(categoriesData.data || []);
 
         const areasData = await fetchWithAuth("/areas");
         setAreas(areasData.data || []);
-
-        console.log({itemData, categoriesData, areasData})
       } catch (error) {
         console.error("Failed to fetch data:", error);
       }
@@ -59,7 +64,14 @@ export default function EditItem() {
 
   const handleFileChange = (e: ChangeEvent<HTMLInputElement>, type: "photo" | "receipt") => {
     if (e.target.files && e.target.files.length > 0) {
-      type === "photo" ? setPhoto(e.target.files[0]) : setReceipt(e.target.files[0]);
+      const file = e.target.files[0];
+      if (type === "photo") {
+        setPhoto(file);
+        setPhotoBeforeUrl(URL.createObjectURL(file));
+      } else {
+        setReceipt(file);
+        setReceiptBeforeUrl(URL.createObjectURL(file));
+      }
     }
   };
 
@@ -72,11 +84,10 @@ export default function EditItem() {
     if (receipt) formData.append("receipt", receipt);
 
     try {
-      const response = await fetchWithAuth(`/items/${itemId}`, {
+      await fetchWithAuth(`/items/${itemId}`, {
         method: "PATCH",
         body: formData,
       });
-       console.log(response)
       navigate("/admin-dashboard/items?success=updated");
     } catch (error) {
       console.error("Failed to update item:", error);
@@ -121,30 +132,62 @@ export default function EditItem() {
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4 mt-4">
-                  <div>
-                    <label className="block font-semibold">Examination Period</label>
-                    <input
-                      type="number"
-                      name="examinationPeriod"
-                      value={item.examinationPeriod}
-                      onChange={handleChange}
-                      className="border p-2 rounded-lg w-full"
-                    />
-                  </div>
-                  <div>
-                <label className="block font-semibold">Price</label>
-                <input type="number" name="price" value={item.price} onChange={handleChange} className="border p-2 rounded-lg w-full" required />
-              </div>
+                <div>
+                  <label className="block font-semibold">Examination Period</label>
+                  <input
+                    type="number"
+                    name="examinationPeriod"
+                    value={item.examinationPeriod}
+                    onChange={handleChange}
+                    className="border p-2 rounded-lg w-full"
+                  />
                 </div>
-              
+                <div>
+                  <label className="block font-semibold">Price</label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={item.price}
+                    onChange={handleChange}
+                    className="border p-2 rounded-lg w-full"
+                    required
+                  />
+                </div>
+              </div>
               <div className="grid grid-cols-2 gap-4 mt-4">
                 <div>
                   <label className="block font-semibold">Photo</label>
-                  <input type="file" name="photo" accept="image/*" onChange={(e) => handleFileChange(e, "photo")} className="border p-2 rounded-lg w-full" />
+                  <input
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, "photo")}
+                    className="border p-2 rounded-lg w-full"
+                  />
+                  {photoBeforeUrl && (
+                    <img
+                      src={photoBeforeUrl}
+                      alt="Current Photo"
+                      className="mt-2 rounded border h-40 object-contain"
+                    />
+                  )}
                 </div>
                 <div>
                   <label className="block font-semibold">Receipt</label>
-                  <input type="file" name="receipt" accept="image/*" onChange={(e) => handleFileChange(e, "receipt")} className="border p-2 rounded-lg w-full" />
+                  <input
+                    type="file"
+                    name="receipt"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, "receipt")}
+                    className="border p-2 rounded-lg w-full"
+                  />
+                  {receiptBeforeUrl && (
+                    <img
+                      src={receiptBeforeUrl}
+                      alt="Current Receipt"
+                      className="mt-2 rounded border h-40 object-contain"
+                    />
+                  )}
                 </div>
               </div>
             </div>

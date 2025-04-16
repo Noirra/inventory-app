@@ -30,6 +30,7 @@ export default function AdminItem() {
   const [searchQuery, setSearchQuery] = useState("");
 
   const fetchData = async () => {
+    console.log('api')
     setLoading(true);
     try {
       const response = await fetchWithAuth("/items");
@@ -43,7 +44,7 @@ export default function AdminItem() {
 
   useEffect(() => {
     fetchData();
-  
+
     const params = new URLSearchParams(window.location.search);
     const successMessage = params.get("success");
     if (successMessage) {
@@ -51,18 +52,18 @@ export default function AdminItem() {
         successMessage === "created"
           ? "Item added successfully!"
           : successMessage === "updated"
-          ? "Item updated successfully!"
-          : "";
-  
+            ? "Item updated successfully!"
+            : "";
+
       if (message) {
         setMessage(message);
         setTimeout(() => setMessage(""), 3000);
-  
+
         navigate("/admin-dashboard/items", { replace: true });
       }
     }
   }, []);
-  
+
   const filteredItems = items.filter(item =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.code.toLowerCase().includes(searchQuery.toLowerCase())
@@ -118,9 +119,18 @@ export default function AdminItem() {
                   <tr key={item.id} className="border">
                     <td className="p-3 border text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td className="p-3 border text-center cursor-pointer hover:underline" onClick={() => navigate(`/admin-dashboard/items/komponen/${item.id}`)}><span className="text-blue-600">{item.name}</span></td>
-                    <td className="p-3 border text-center">${item.price}</td>
                     <td className="p-3 border text-center">
-                      <span className={`font-semibold inline-block px-2 ${item.status === "UNUSED" ? "text-yellow-600" : "text-green-600"}`}>
+  {new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    minimumFractionDigits: 0,
+  }).format(item.price)}
+</td>
+
+                    <td className="p-3 border text-center">
+                      <span
+                        className={`px-3 py-1 rounded-full text-xs font-semibold ${item.status === "UNUSED" ? "bg-yellow-100 text-yellow-700" : "bg-green-100 text-green-700"}`}
+                      >
                         {item.status}
                       </span>
                     </td>

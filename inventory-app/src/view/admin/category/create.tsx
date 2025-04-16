@@ -1,89 +1,177 @@
-import { useState, ChangeEvent, FormEvent } from "react";
-import { FaArrowLeft, FaSave } from "react-icons/fa";
-import Sidebar from "@/components/ui/sidebar";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, ChangeEvent, FormEvent } from "react";
+import { FaSave } from "react-icons/fa";
+import Notification from "@/components/ui/notification";
 import fetchWithAuth from "@/utils/fetchInterceptor";
 
-export default function CreateCategory() {
-  const navigate = useNavigate();
-  const [category, setCategory] = useState({ name: "", code: "" });
+interface Category {
+  id: string;
+  code: string;
+  name: string;
+}
+
+interface CreateCategoryModalProps {
+  onClose: () => void;
+  onSuccess: () => void;
+  category: Category | null;
+  modalType: "create" | "edit";
+}
+
+const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
+  onClose,
+  onSuccess,
+  category,
+  modalType,
+}) => {
+  const [formData, setFormData] = useState<Category>({
+    id: "",
+    code: "",
+    name: "",
+  });
+  const [isVisible, setIsVisible] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (modalType === "edit" && category) {
+      setFormData(category);
+    } else {
+      setFormData({ id: "", code: "", name: "" });
+    }
+    setTimeout(() => setIsVisible(true), 10);
+  }, [category, modalType]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
-    setCategory({ ...category, [e.target.name]: e.target.value });
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
   };
 
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(() => onClose(), 200);
+  };
+
+  const handleCloseNotification = () => {
+    setMessage("");
+  };
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-  
+    setLoading(true);
+
     try {
-      const result = await fetchWithAuth("/categories", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(category),
+      const method = modalType === "edit" ? "PATCH" : "POST";
+      const url = modalType === "edit" ? `/categories/${formData.id}` : "/categories";
+
+      const result = await fetchWithAuth(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
       });
-  
-      if (!result.success) {
-        throw new Error(result.message || "Gagal menambahkan kategori");
+
+      if (!result.ok && !result.data) {
+        throw new Error(result.message || "Gagal menyimpan kategori");
       }
-  
-      navigate("/admin-dashboard/category?success=created");
+
+      setMessage(modalType === "edit" ? "Kategori berhasil diperbarui!" : "Kategori berhasil dibuat!");
+      setTimeout(() => setMessage(""), 2000);
+
+      setTimeout(() => {
+        onSuccess();
+      }, 500);
     } catch (error: any) {
-      alert(error.message || "Terjadi kesalahan");
+      setMessage(error.message || "Terjadi kesalahan");
+    } finally {
+      setLoading(false);
     }
   };
 
-
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar />
+    <>
+      {message && (
+        <Notification message={message} onClose={handleCloseNotification} />
+      )}
 
-      {/* Main Content */}
-      <div className="flex-1 p-6">
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow border p-6">
-          <button onClick={() => navigate("/admin-dashboard/category")} className="mb-4 flex items-center text-blue-500 hover:underline">
-            <FaArrowLeft className="mr-2" /> Back
-          </button>
-
-          <h2 className="text-xl font-semibold mb-4">Create New Category</h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-4">
-            <div className="flex flex-col">
-              <label htmlFor="name" className="mb-1 font-medium text-gray-700">Category Name</label>
+      <div
+        className={`fixed inset-0 flex justify-center items-center bg-black/20 backdrop-blur-sm transition-opacity duration-200 ${
+          isVisible ? "opacity-100" : "opacity-0"
+        }`}
+      >
+        <div
+          className={`bg-white rounded-2xl shadow-lg p-6 max-w-md w-full transform transition-all duration-200 ${
+            isVisible ? "scale-100" : "scale-95"
+          }`}
+        >
+          <h2 className="text-xl font-semibold mb-4">
+            {modalType === "create" ? "Buat Kategori Baru" : "Edit Kategori"}
+          </h2>
+          <form onSubmit={handleSubmit} className="grid gap-4">
+            <div>
+              <label
+                htmlFor="name"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Nama Kategori
+              </label>
               <input
                 type="text"
                 id="name"
                 name="name"
-                placeholder="Category Name"
+                placeholder="Nama Kategori"
+                value={formData.name}
                 onChange={handleChange}
                 className="border p-2 rounded-lg w-full"
                 required
               />
             </div>
-
-            <div className="flex flex-col">
-              <label htmlFor="code" className="mb-1 font-medium text-gray-700">Category Code</label>
+            <div>
+              <label
+                htmlFor="code"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Kode Kategori
+              </label>
               <input
                 type="text"
                 id="code"
                 name="code"
-                placeholder="Category Code"
+                maxLength={3}
+                placeholder="Kode"
+                value={formData.code}
                 onChange={handleChange}
                 className="border p-2 rounded-lg w-full"
                 required
               />
             </div>
-
-            <div className="flex justify-end">
-              <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600">
-                <FaSave /> <span>Save Category</span>
+            <div className="flex justify-between">
+              <button
+                type="button"
+                onClick={handleClose}
+                className="bg-gray-300 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-400"
+              >
+                Batal
+              </button>
+              <button
+                type="submit"
+                className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600 disabled:opacity-50"
+                disabled={loading}
+              >
+                <FaSave />
+                <span>
+                  {loading
+                    ? "Menyimpan..."
+                    : modalType === "create"
+                    ? "Simpan Kategori"
+                    : "Perbarui Kategori"}
+                </span>
               </button>
             </div>
           </form>
         </div>
       </div>
-    </div>
+    </>
   );
-}
+};
+
+export default CreateCategoryModal;

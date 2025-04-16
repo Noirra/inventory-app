@@ -14,7 +14,7 @@ export default function CreateUserItem() {
   useEffect(() => {
     const fetchItems = async () => {
       try {
-        const itemsData = await fetchWithAuth("/items");
+        const itemsData = await fetchWithAuth("/user-items/get-unused");
         setItems(Array.isArray(itemsData.data) ? itemsData.data : []);
       } catch (error) {
         console.error("Failed to fetch items:", error);

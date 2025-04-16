@@ -51,10 +51,8 @@ export default function ItemRequestOwner() {
     if (confirmApprove.isConfirmed) {
       try {
         await fetchWithAuth(`/item-request/${id}/approve-owner`, { method: "PATCH" });
-
         setMessage("Item request approved successfully!");
         await fetchData();
-
       } catch (error) {
         console.error("Failed to approve item request:", error);
         Swal.fire("Error", "Failed to approve item request.", "error");
@@ -62,7 +60,30 @@ export default function ItemRequestOwner() {
     }
   };
 
-  const filteredItems = items.filter(item =>
+  const rejectItem = async (id: string) => {
+    const confirmReject = await Swal.fire({
+      title: "Reject this request?",
+      text: "You are about to reject this item request.",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, reject it!",
+    });
+
+    if (confirmReject.isConfirmed) {
+      try {
+        await fetchWithAuth(`/item-request/${id}/reject`, { method: "PATCH" });
+        setMessage("Item request rejected successfully!");
+        await fetchData();
+      } catch (error) {
+        console.error("Failed to reject item request:", error);
+        Swal.fire("Error", "Failed to reject item request.", "error");
+      }
+    }
+  };
+
+  const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.desc.toLowerCase().includes(searchQuery.toLowerCase())
   );
@@ -115,18 +136,38 @@ export default function ItemRequestOwner() {
                     <td className="p-3 border text-center">{item.desc}</td>
                     <td className="p-3 border text-center">{item.priceRange}</td>
                     <td className="p-3 border text-center">
-                      <span className="text-red-600 font-semibold">{item.status}</span>
+                      <span
+                        className={`font-semibold ${
+                          item.status === "PENDING"
+                            ? "text-yellow-600"
+                            : item.status === "APPROVED"
+                            ? "text-green-600"
+                            : item.status === "REJECTED"
+                            ? "text-red-600"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {item.status}
+                      </span>
                     </td>
                     <td className="p-3 border text-center">
                       {item.status === "PENDING" ? (
-                        <button
-                          className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
-                          onClick={() => approveItem(item.id)}
-                        >
-                          Approve
-                        </button>
+                        <div className="flex justify-center gap-2">
+                          <button
+                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                            onClick={() => approveItem(item.id)}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
+                            onClick={() => rejectItem(item.id)}
+                          >
+                            Reject
+                          </button>
+                        </div>
                       ) : (
-                        <span className="text-gray-400">Approved</span>
+                        <span className="text-gray-400 italic">No Action</span>
                       )}
                     </td>
                   </tr>
@@ -141,7 +182,11 @@ export default function ItemRequestOwner() {
             </tbody>
           </table>
           <div className="mt-4">
-            <Pagination currentPage={currentPage} totalPages={totalPages} changePage={setCurrentPage} />
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              changePage={setCurrentPage}
+            />
           </div>
         </div>
       </div>

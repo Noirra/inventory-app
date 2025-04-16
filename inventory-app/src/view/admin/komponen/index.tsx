@@ -62,6 +62,17 @@ export default function AdminItems() {
       <Sidebar />
       <div className="flex-1 p-6 overflow-y-auto">
         <h1 className="text-2xl font-semibold mb-6">Components Management</h1>
+        <nav className="flex items-center text-sm text-gray-500 mb-4 space-x-2">
+          <Link to="/admin-dashboard" className="hover:text-blue-600 transition-colors">
+            Dashboard
+          </Link>
+          <span>/</span>
+          <Link to="/admin-dashboard/items" className="hover:text-blue-600 transition-colors">
+            Items
+          </Link>
+          <span>/</span>
+          <span className="text-gray-800 font-medium">Components</span>
+        </nav>
         <div className="bg-white p-6 rounded-2xl shadow border">
           <h2 className="text-lg font-semibold mb-4">Components List</h2>
           <Notification message={message} onClose={() => setMessage("")} />
@@ -99,7 +110,15 @@ export default function AdminItems() {
                   <tr key={item.id} className="border">
                     <td className="p-3 border text-center">{(currentPage - 1) * itemsPerPage + index + 1}</td>
                     <td className="p-3 border text-center">{item.name}</td>
-                    <td className="p-3 border text-center">{item.photo || "No Photo"}</td>
+                    <td className="p-3 border text-center">
+                      {item?.photo && (
+                        <img
+                          src={`https://inventory.bariqfirjatullah.my.id/${item.photo}`}
+                          alt="Component"
+                          className="mx-auto h-16 w-16 object-cover rounded"
+                        />
+                      )}
+                    </td>
                     <td className="p-3 border text-center space-x-2">
                       <Link to={`/admin-dashboard/items/${itemId}/komponen/edit/${item.id}`}>
                         <button className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600">
