@@ -16,8 +16,8 @@ interface Item {
   receipt: string;
   status: string;
   code: string;
-  examinationPeriod: string;
-  groupCode: string;
+  examinationPeriodDate: string;
+  examinationPeriodMonth: number;
 }
 
 export default function OwnerItem() {
@@ -30,6 +30,27 @@ export default function OwnerItem() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [showModal, setShowModal] = useState(false);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [areas, setAreas] = useState<{ id: string; name: string }[]>([]);
+
+
+  const fetchCategories = async () => {
+    try {
+      const response = await fetchWithAuth("/categories");
+      setCategories(response.data);
+    } catch (error) {
+      console.error("Error fetching categories:", error);
+    }
+  };
+
+  const fetchAreas = async () => {
+    try {
+      const response = await fetchWithAuth("/areas");
+      setAreas(response.data);
+    } catch (error) {
+      console.error("Error fetching areas:", error);
+    }
+  };
 
   const fetchData = async () => {
     setLoading(true);
@@ -45,6 +66,8 @@ export default function OwnerItem() {
 
   useEffect(() => {
     fetchData();
+    fetchCategories();
+    fetchAreas();
 
     const params = new URLSearchParams(window.location.search);
     const successMessage = params.get("success");
@@ -53,17 +76,18 @@ export default function OwnerItem() {
         successMessage === "created"
           ? "Item added successfully!"
           : successMessage === "updated"
-          ? "Item updated successfully!"
-          : "";
+            ? "Item updated successfully!"
+            : "";
 
       if (message) {
         setMessage(message);
         setTimeout(() => setMessage(""), 3000);
-
         navigate("/owner-dashboard/items", { replace: true });
       }
     }
   }, []);
+
+
 
   const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -104,13 +128,15 @@ export default function OwnerItem() {
               <tr className="bg-gray-200">
                 <th className="p-3 border">No</th>
                 <th className="p-3 border">Name</th>
+                <th className="p-3 border">Price</th>
+                <th className="p-3 border">Status</th>
                 <th className="p-3 border">Actions</th>
               </tr>
             </thead>
             <tbody>
               {loading ? (
                 <tr>
-                  <td colSpan={6} className="p-3 text-center text-gray-500">
+                  <td colSpan={5} className="p-3 text-center text-gray-500">
                     Loading data...
                   </td>
                 </tr>
@@ -121,6 +147,10 @@ export default function OwnerItem() {
                       {(currentPage - 1) * itemsPerPage + index + 1}
                     </td>
                     <td className="p-3 border text-center">{item.name}</td>
+                    <td className="p-3 border text-center">
+                      Rp {item.price.toLocaleString("id-ID")}
+                    </td>
+                    <td className="p-3 border text-center">{item.status}</td>
                     <td className="p-3 border text-center space-x-2">
                       <button
                         onClick={() => handleDetail(item)}
@@ -133,7 +163,7 @@ export default function OwnerItem() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="p-3 text-center text-gray-500">
+                  <td colSpan={5} className="p-3 text-center text-gray-500">
                     No items found.
                   </td>
                 </tr>
@@ -150,20 +180,44 @@ export default function OwnerItem() {
 
       {/* Modal */}
       {showModal && selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white p-6 rounded-xl w-[90%] max-w-lg shadow-lg relative">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+          <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg p-6">
             <h2 className="text-xl font-semibold mb-4">Item Detail</h2>
             <div className="space-y-2">
               <p><strong>Name:</strong> {selectedItem.name}</p>
               <p><strong>Code:</strong> {selectedItem.code}</p>
-              <p><strong>Price:</strong> ${selectedItem.price}</p>
+              <p><strong>Price:</strong> Rp {selectedItem.price.toLocaleString("id-ID")}</p>
               <p><strong>Status:</strong> {selectedItem.status}</p>
-              <p><strong>Examination Period:</strong> {selectedItem.examinationPeriod}</p>
-              <p><strong>Group Code:</strong> {selectedItem.groupCode}</p>
-              <p><strong>Category ID:</strong> {selectedItem.categoryId}</p>
-              <p><strong>Area ID:</strong> {selectedItem.areaId}</p>
-              <p><strong>Receipt:</strong> {selectedItem.receipt}</p>
-              <p><strong>Photo:</strong> <a href={selectedItem.photo} className="text-blue-600 underline" target="_blank">View</a></p>
+              <p><strong>Examination Period:</strong> {new Date(selectedItem.examinationPeriodDate).toLocaleDateString("id-ID")}</p>
+              <p><strong>Examination Month:</strong> {selectedItem.examinationPeriodMonth}</p>
+              <p>
+                <strong>Category:</strong>{" "}
+                {(() => {
+                  const index = categories.findIndex((cat) => cat.id === selectedItem.categoryId);
+                  return index !== -1 ? `${index + 1}` : "Unknown";
+                })()}
+              </p>
+              <p>
+                <strong>Area:</strong>{" "}
+                {(() => {
+                  const index = areas.findIndex((area) => area.id === selectedItem.areaId)
+                  return index !== -1 ? `${index + 1}` : "Unknown";
+                })()}
+              </p>
+              <p><strong>Receipt:</strong>
+                <img
+                  src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.photo}`}
+                  alt="Item Photo"
+                  className="w-20 h-20 mt-2"
+                />
+              </p>
+              <p><strong>Photo:</strong>
+                <img
+                  src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.receipt}`}
+                  alt="Item Photo"
+                  className="w-20 h-20 mt-2"
+                />
+              </p>
             </div>
             <button
               className="absolute top-2 right-2 text-gray-500 hover:text-black"
