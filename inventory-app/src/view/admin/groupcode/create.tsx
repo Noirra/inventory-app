@@ -3,6 +3,7 @@ import { FaArrowLeft, FaSave } from "react-icons/fa";
 import Sidebar from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
 import fetchWithAuth from "@/utils/fetchInterceptor";
+import Swal from "sweetalert2";
 
 export default function CreateGroupCode() {
   const navigate = useNavigate();
@@ -24,9 +25,34 @@ export default function CreateGroupCode() {
       body: JSON.stringify(groupCode),
     });
 
+    if (!response.success) {
+      throw new Error(response.message || "Gagal menambahkan group code");
+    }
+
     navigate("/admin-dashboard/groupcode?success=created");
   } catch (error: any) {
-    alert(error.message || "An error occurred");
+    console.error("Error saat submit group code:", error);
+
+    const msg = error.message || "Terjadi kesalahan";
+    const isDuplicate = msg.toLowerCase().includes("duplicate") || msg.toLowerCase().includes("already") || msg.includes("400");
+
+    if (isDuplicate) {
+      await Swal.fire({
+        title: "Maaf!",
+        text: "Nama group code sudah ada.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "OK",
+      });
+    } else {
+      await Swal.fire({
+        title: "Terjadi Kesalahan",
+        text: msg,
+        icon: "error",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "OK",
+      });
+    }
   }
 };
 

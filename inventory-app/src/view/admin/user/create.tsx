@@ -2,6 +2,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { FaArrowLeft, FaSave, } from "react-icons/fa";
 import Sidebar from "@/components/ui/sidebar";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import fetchWithAuth from "@/utils/fetchInterceptor";
 
 export default function CreateUser() {
@@ -32,15 +33,31 @@ export default function CreateUser() {
   
       navigate("/admin-dashboard/users?success=created");
     } catch (error: any) {
+      console.error("Error saat submit user:", error);
+    
       const msg = error.message || "Terjadi kesalahan";
-  
-      if (msg.toLowerCase().includes("duplicate")) {
-        alert("User dengan email ini sudah terdaftar.");
+      const isDuplicate = msg.toLowerCase().includes("duplicate") || msg.toLowerCase().includes("already") || msg.includes("400");
+    
+      if (isDuplicate) {
+        await Swal.fire({
+          title: "Maaf!",
+          text: "User dengan email ini sudah terdaftar.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
       } else {
-        alert(msg);
+        await Swal.fire({
+          title: "Terjadi Kesalahan",
+          text: msg,
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
       }
-    }
+    }    
   };
+  
 
   return (
     <div className="flex h-screen bg-gray-100">
