@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FaBars, FaChartBar, FaUsers, FaBox, FaThLarge, FaMapMarkedAlt, FaBoxOpen, FaTags } from "react-icons/fa";
 import { Link } from "react-router-dom";
 import LogoutButton from "@/components/ui/logoutbutton";
 
 export default function Sidebar() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [adminInfo, setAdminInfo] = useState<string | null>(null);
 
   const menuItems = [
     { name: "Dashboard", icon: <FaChartBar />, path: "/admin-dashboard" },
@@ -16,6 +17,12 @@ export default function Sidebar() {
     { name: "Item Request", icon: <FaBoxOpen />, path: "/admin-dashboard/item-request" },
   ];
 
+  useEffect(() => {
+    // Fetch admin username/role from localStorage (or context)
+    const admin = JSON.parse(localStorage.getItem("admin") || "{}");
+    setAdminInfo(admin?.name || "Admin");
+  }, []);
+
   return (
     <div className={`transition-all duration-300 ${sidebarOpen ? "w-64" : "w-20"} bg-[#0A2342] text-white flex flex-col`}>
       <div className="flex items-center justify-between px-4 py-4 border-b border-white/20">
@@ -24,6 +31,17 @@ export default function Sidebar() {
           <FaBars />
         </button>
       </div>
+
+      {/* Menampilkan nama admin di bawah menu */}
+      {adminInfo && sidebarOpen && (
+        <div className="px-4 py-2 text-left text-gray-300 mt-auto">
+          {sidebarOpen ? (
+            <span>Welcome, {adminInfo}</span>
+          ) : (
+            <span>Welcome</span>
+          )}
+        </div>
+      )}
 
       <nav className="flex-1 py-4 space-y-2">
         {menuItems.map((item, index) => (
@@ -39,7 +57,7 @@ export default function Sidebar() {
       </nav>
 
       <div className="p-4 w-full">
-        <LogoutButton />
+      <LogoutButton sidebarOpen={sidebarOpen} />
       </div>
     </div>
   );
