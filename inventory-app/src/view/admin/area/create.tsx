@@ -2,6 +2,8 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { FaSave } from "react-icons/fa";
 import Notification from "@/components/ui/notification";
 import fetchWithAuth from "@/utils/fetchInterceptor";
+import Swal from "sweetalert2";
+
 
 interface Area {
   id: string;
@@ -81,7 +83,32 @@ const CreateAreaModal: React.FC<CreateAreaModalProps> = ({
         onSuccess(); // refresh data dan tutup modal
       }, 500);
     } catch (error: any) {
-      setMessage(error.message || "Terjadi kesalahan");
+      const msg = error.message || "Terjadi kesalahan";
+  
+      // Coba deteksi kalau kode area sudah ada dari pesan backend
+      const isDuplicate =
+        msg.toLowerCase().includes("kode") && msg.toLowerCase().includes("sudah") ||
+        msg.toLowerCase().includes("duplicate") ||
+        msg.toLowerCase().includes("exists") ||
+        msg.includes("400") || msg.includes("409");
+  
+      if (isDuplicate) {
+        await Swal.fire({
+          title: "Maaf!",
+          text: "Kode area sudah ada di sistem.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
+      } else {
+        await Swal.fire({
+          title: "Terjadi Kesalahan",
+          text: msg,
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
+      }
     } finally {
       setLoading(false);
     }

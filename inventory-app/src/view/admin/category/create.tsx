@@ -2,6 +2,7 @@ import { useState, useEffect, ChangeEvent, FormEvent } from "react";
 import { FaSave } from "react-icons/fa";
 import Notification from "@/components/ui/notification";
 import fetchWithAuth from "@/utils/fetchInterceptor";
+import Swal from "sweetalert2";
 
 interface Category {
   id: string;
@@ -81,7 +82,34 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
         onSuccess();
       }, 500);
     } catch (error: any) {
-      setMessage(error.message || "Terjadi kesalahan");
+      const msg = error.message || "Terjadi kesalahan";
+
+      const isDuplicate =
+        msg.toLowerCase().includes("duplicate") ||
+        msg.toLowerCase().includes("unique") ||
+        msg.toLowerCase().includes("sudah ada") ||
+        msg.toLowerCase().includes("exists") ||
+        msg.includes("409");   
+  
+      if (isDuplicate) {
+        await Swal.fire({
+          title: "Kode Kategori Duplikat",
+          text: "Kode kategori sudah digunakan. Gunakan kode lain.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
+      } else {
+        await Swal.fire({
+          title: "Terjadi Kesalahan",
+          text: msg,
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
+      }
+  
+      setMessage("");
     } finally {
       setLoading(false);
     }

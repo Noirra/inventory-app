@@ -3,6 +3,8 @@ import { FaSave } from "react-icons/fa";
 import { useParams } from "react-router-dom";
 import fetchWithAuth from "@/utils/fetchInterceptor";
 import Notification from "@/components/ui/notification";
+import Swal from "sweetalert2";
+
 
 interface EditAreaProps {
   onClose: () => void;
@@ -73,11 +75,36 @@ export default function EditArea({ onClose, onSuccess }: EditAreaProps) {
       }, 250);
     } catch (error: any) {
       console.error("Update error:", error);
-      setMessage(error.message || "Terjadi kesalahan saat update");
-      setTimeout(() => setMessage(""), 3000);
+      const msg = error.message || "Terjadi kesalahan saat update";
+  
+      const isDuplicate =
+        msg.toLowerCase().includes("duplicate") ||
+        msg.toLowerCase().includes("unique") ||
+        msg.toLowerCase().includes("sudah ada") ||
+        msg.toLowerCase().includes("exists") ||
+        msg.includes("409");
+  
+      if (isDuplicate) {
+        await Swal.fire({
+          title: "Kode Area Duplikat",
+          text: "Kode area sudah digunakan. Gunakan kode lain.",
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
+      } else {
+        await Swal.fire({
+          title: "Terjadi Kesalahan",
+          text: msg,
+          icon: "error",
+          confirmButtonColor: "#d33",
+          confirmButtonText: "OK",
+        });
+      }
+  
+      setMessage("");
     }
   };
-
   return (
     <>
       <Notification message={message} onClose={handleCloseNotification} />
