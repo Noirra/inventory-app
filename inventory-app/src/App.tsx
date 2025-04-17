@@ -34,6 +34,12 @@ import OwnerDashboard from "./view/owner/dashboard";
 import ItemRequestOwner from "./view/owner/item-request/index";
 import OwnerItem from "./view/owner/items/index";
 import ProtectedRoute from "./middleware/protectedroute";
+import OwnerGroupCode from "./view/owner/groupcode";
+import OwnerCategory from "./view/owner/category";
+import OwnerArea from "./view/owner/area";
+import OwnerGroupItem from "./view/owner/groupitem";
+
+
 
 function App() {
   return (
@@ -95,6 +101,10 @@ function App() {
               <Route index element={<OwnerDashboard />} />
               <Route path="item-request" element={<ItemRequestOwner />} />
               <Route path="items" element={<OwnerItem />} />
+              <Route path="groupcode" element={<OwnerGroupCode />} />
+              <Route path="category" element={<OwnerCategory />} />
+              <Route path="area" element={<OwnerArea />} />
+              <Route path="groupcode/groupitem/:groupId" element={<OwnerGroupItem />} />
             </Routes>
           </ProtectedRoute>
         } />
