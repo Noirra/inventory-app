@@ -20,6 +20,7 @@ export default function ItemRequestAdmin() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
   const [searchQuery, setSearchQuery] = useState("");
+  const [approvedItems, setApprovedItems] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     fetchData();
@@ -52,6 +53,7 @@ export default function ItemRequestAdmin() {
       try {
         await fetchWithAuth(`/item-request/${id}/approve-admin`, { method: "PATCH" });
         setMessage("Item request approved successfully!");
+        setApprovedItems((prev) => new Set(prev).add(id)); // Track approved items
         await fetchData();
       } catch (error) {
         console.error("Failed to approve item request:", error);
@@ -86,7 +88,7 @@ export default function ItemRequestAdmin() {
   const completeItem = async (id: string) => {
     const confirm = await Swal.fire({
       title: "Complete this request?",
-      text: "You are about to Complete this item request.",
+      text: "You are about to complete this item request.",
       icon: "warning",
       showCancelButton: true,
       confirmButtonColor: "#28a745",
@@ -173,12 +175,14 @@ export default function ItemRequestAdmin() {
                     <td className="p-3 border text-center">
                       {item.status === "PENDING" ? (
                         <div className="flex justify-center gap-2">
-                          <button
-                            className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
-                            onClick={() => approveItem(item.id)}
-                          >
-                            Approve
-                          </button>
+                          { !approvedItems.has(item.id) && (
+                            <button
+                              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                              onClick={() => approveItem(item.id)}
+                            >
+                              Approve
+                            </button>
+                          )}
                           <button
                             className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
                             onClick={() => rejectItem(item.id)}
@@ -197,7 +201,6 @@ export default function ItemRequestAdmin() {
                         <span className="text-gray-400 italic">No actions</span>
                       )}
                     </td>
-
                   </tr>
                 ))
               ) : (
