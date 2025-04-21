@@ -1,208 +1,198 @@
-import { useNavigate } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Sidebar from "@/components/sidebar/employee";
 import {
   FaSearch,
   FaBox,
-  FaShoppingCart,
-  FaExclamationCircle,
+  FaBoxOpen,
+  FaThLarge,
   FaUsers,
-  FaMoon,
-  FaSun,
 } from "react-icons/fa";
+import fetchWithAuth from "@/utils/fetchInterceptor";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
-const initialProducts = [
-  { name: "Product A", stock: 120, price: 25.0 },
-  { name: "Product B", stock: 80, price: 40.0 },
-  { name: "Product C", stock: 0, price: 15.0 },
-  { name: "Product D", stock: 60, price: 30.0 },
-  { name: "Product E", stock: 200, price: 20.0 },
-];
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  status: "USED" | "UNUSED";
+  photo?: string;
+  code: string;
+  receipt?: string;
+  examinationPeriodDate: string;
+  examinationPeriodMonth: number;
+};
 
-export default function AdminDashboard() {
-  const navigate = useNavigate();
+export default function EmployeeDashboard() {
   const [searchTerm, setSearchTerm] = useState("");
-  const [stockFilter, setStockFilter] = useState("all"); // all, in-stock, out-of-stock
-  const [darkMode, setDarkMode] = useState(false);
+  const [userCount, setUserCount] = useState(0);
+  const [itemCount, setItemCount] = useState(0);
+  const [itemrequestCount, setItemRequestCount] = useState(0);
+  const [categoryCount, setCategoryCount] = useState(0);
+  const [items, setItems] = useState<Product[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
 
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    const fetchCounts = async () => {
+      try {
+        const [userData, itemData, itemrequestData, categoryData] =
+          await Promise.all([
+            fetchWithAuth("/users"),
+            fetchWithAuth(`/user-items/user/${userId}`),
+            fetchWithAuth("/item-request"),
+            fetchWithAuth("/categories"),
+          ]);
 
-  // Filter dan pencarian
-  const filteredProducts = initialProducts
-    .filter((product) =>
-      product.name.toLowerCase().includes(searchTerm.toLowerCase())
-    )
-    .filter((product) => {
-      if (stockFilter === "all") return true;
-      if (stockFilter === "in-stock") return product.stock > 0;
-      if (stockFilter === "out-of-stock") return product.stock <= 0;
-      return true;
-    });
+        if (userData.success && Array.isArray(userData.users)) {
+          setUserCount(userData.users.length);
+        }
+
+        if (itemData.success && Array.isArray(itemData.data)) {
+          const extractedItems = itemData.data
+            .map((entry: any) => entry.item)
+            .filter((item: any) => item !== null);
+          setItemCount(extractedItems.length);
+          setItems(extractedItems);
+        }
+
+        if (itemrequestData.success && Array.isArray(itemrequestData.data)) {
+          setItemRequestCount(itemrequestData.data.length);
+        }
+
+        if (categoryData.success && Array.isArray(categoryData.data)) {
+          setCategoryCount(categoryData.data.length);
+        }
+
+        setLoadingItems(false);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        setLoadingItems(false); // fix utama!
+      }
+    };
+
+    fetchCounts();
+  }, []);
+
+  const filteredProducts = items.filter((product) =>
+    (product.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  console.log("Items:", items);
+  console.log("Filtered:", filteredProducts);
+  console.log("Loading:", loadingItems);
 
   const summaryCards = [
     {
       title: "Total Users",
-      value: 120,
+      value: userCount,
       icon: <FaUsers className="text-green-500" />,
-      borderColor: "border-green-400",
+      borderColor: "border-green-500",
     },
     {
-      title: "Total Products",
-      value: 5483,
+      title: "Items",
+      value: itemCount,
       icon: <FaBox className="text-blue-500" />,
-      borderColor: "border-blue-400",
+      borderColor: "border-blue-500",
     },
     {
-      title: "Orders",
-      value: 2859,
-      icon: <FaShoppingCart className="text-purple-500" />,
-      borderColor: "border-purple-400",
+      title: "Item Request",
+      value: itemrequestCount,
+      icon: <FaBoxOpen className="text-purple-500" />,
+      borderColor: "border-purple-500",
     },
     {
-      title: "Out of Stock",
-      value: 38,
-      icon: <FaExclamationCircle className="text-red-500" />,
-      borderColor: "border-red-400",
+      title: "Category",
+      value: categoryCount,
+      icon: <FaThLarge className="text-red-500" />,
+      borderColor: "border-red-500",
     },
   ];
 
-  const toggleDarkMode = () => {
-    setDarkMode(!darkMode);
+  const sliderSettings = {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: 3 } },
+      { breakpoint: 768, settings: { slidesToShow: 2 } },
+      { breakpoint: 480, settings: { slidesToShow: 1 } },
+    ],
   };
 
   return (
-    <div className={`${darkMode ? "bg-gray-900 text-white" : "bg-gray-100 text-gray-900"} flex h-screen transition-colors duration-300`}>
-      {/* Sidebar */}
+    <div className="bg-gray-100 text-gray-800 flex h-screen">
       <Sidebar />
-
-      {/* Main Content */}
       <div className="flex-1 p-6 overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-bold mb-1">Admin Inventory</h1>
-            <p className="text-sm text-gray-500 dark:text-gray-300">
-              Welcome Admin! Manage your data effectively.
+        <div className="relative rounded-2xl mb-6 overflow-hidden shadow-lg">
+          <img
+            src="/banner-user.jpg"
+            alt="Welcome Banner"
+            className="w-full h-48 object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/60 to-transparent p-6 flex flex-col justify-center">
+            <h1 className="text-3xl font-bold text-gray-800 mb-1 drop-shadow">
+              Welcome back! 🎉
+            </h1>
+            <p className="text-gray-600 font-medium">
+              Here's a summary of your inventory.
             </p>
           </div>
-
-          <div className="flex items-center space-x-4">
-            {/* Toggle Dark Mode */}
-            <button
-              onClick={toggleDarkMode}
-              className="p-2 rounded-full bg-white dark:bg-gray-800 shadow"
-              aria-label="Toggle Dark Mode"
-            >
-              {darkMode ? <FaSun className="text-yellow-400" /> : <FaMoon />}
-            </button>
-
-            {/* Search Box */}
-            <div className="flex items-center border rounded-full px-4 py-2 shadow-sm bg-white dark:bg-gray-800">
-              <FaSearch className="text-gray-500" aria-hidden="true" />
-              <input
-                type="text"
-                placeholder="Search product..."
-                className="ml-2 outline-none bg-transparent w-32 focus:w-48 transition-all text-sm dark:text-gray-100"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                aria-label="Search products"
-              />
-            </div>
-          </div>
         </div>
 
-        {/* Summary Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {summaryCards.map((card, index) => (
-            <div
-              key={index}
-              className={`bg-white dark:bg-gray-800 p-4 rounded-2xl shadow hover:shadow-xl transition transform hover:-translate-y-1 border-t-4 ${card.borderColor}`}
-            >
-              <div className="flex items-center space-x-4 mb-2">
-                {card.icon}
-                <p className="text-sm text-gray-500 dark:text-gray-300">{card.title}</p>
+        <h2 className="text-xl font-semibold mb-4">📦 Your Items</h2>
+        {loadingItems ? (
+          <div className="flex flex-col items-center justify-center py-10">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-500">Loading items...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
+          <Slider {...sliderSettings}>
+            {filteredProducts.map((product, index) => (
+              <div key={index} className="p-4">
+                <div className="bg-white rounded-2xl shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300 hover:shadow-xl relative">
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={
+                        product.photo
+                          ? `https://inventory.bariqfirjatullah.my.id/${product.photo}`
+                          : "/default-image.png"
+                      }
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-gray-800 truncate">
+                      {product.name}
+                    </h3>
+                  </div>
+                </div>
               </div>
-              <p className="text-3xl font-bold">{card.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* Contoh Chart / Visualisasi (Placeholder) */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow hover:shadow-xl transition transform hover:-translate-y-1 border-t-4 border-indigo-400">
-            <h2 className="text-lg font-semibold mb-2">Sales Overview</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Placeholder for chart or sales data visualization
-            </p>
-            {/* Di sini Anda bisa menambahkan komponen chart dari library seperti Recharts / Chart.js */}
+            ))}
+          </Slider>
+        ) : (
+          <div className="text-center py-10">
+            <img
+              src="/no-data.svg"
+              alt="No items"
+              className="w-40 mx-auto mb-4"
+            />
+            <p className="text-gray-500">No items found.</p>
           </div>
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-2xl shadow hover:shadow-xl transition transform hover:-translate-y-1 border-t-4 border-indigo-400">
-            <h2 className="text-lg font-semibold mb-2">Revenue Overview</h2>
-            <p className="text-sm text-gray-600 dark:text-gray-300 mb-4">
-              Placeholder for chart or revenue data visualization
-            </p>
-            {/* Tambahkan chart lain sesuai kebutuhan */}
-          </div>
-        </div>
+        )}
 
-        {/* Filter Section */}
-        <div className="flex items-center justify-between bg-white dark:bg-gray-800 p-4 rounded-2xl shadow mb-6">
-          <h2 className="text-lg font-semibold">All Products</h2>
-          <div className="flex items-center space-x-2">
-            <label htmlFor="stockFilter" className="text-sm font-medium">
-              Filter:
-            </label>
-            <select
-              id="stockFilter"
-              className="border rounded px-3 py-1 text-sm bg-gray-50 dark:bg-gray-700 dark:text-gray-100"
-              value={stockFilter}
-              onChange={(e) => setStockFilter(e.target.value)}
-            >
-              <option value="all">All</option>
-              <option value="in-stock">In Stock</option>
-              <option value="out-of-stock">Out of Stock</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Products Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProducts.map((product, index) => (
-            <div
-              key={index}
-              className="p-5 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1 bg-gradient-to-br from-white to-gray-100 dark:from-gray-800 dark:to-gray-700 relative overflow-hidden"
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100">
-                  {product.name}
-                </h3>
-                <span
-                  className={`px-3 py-1 text-xs rounded-full font-semibold shadow ${
-                    product.stock > 0
-                      ? "bg-green-100 text-green-700 dark:bg-green-700 dark:text-green-100"
-                      : "bg-red-100 text-red-700 dark:bg-red-700 dark:text-red-100"
-                  }`}
-                >
-                  {product.stock > 0 ? "In Stock" : "Out of Stock"}
-                </span>
-              </div>
-              <p className="text-sm text-gray-600 dark:text-gray-200 mb-1">
-                Stock: {product.stock}
-              </p>
-              <p className="text-sm text-gray-600 dark:text-gray-200 mb-2">
-                Price: ${product.price.toFixed(2)}
-              </p>
-              <div className="absolute -top-4 -right-4 text-gray-200 dark:text-gray-700 opacity-10 text-7xl pointer-events-none">
-                <FaBox />
-              </div>
-              <button className="mt-4 w-full py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 transition">
-                View Details
-              </button>
-            </div>
-          ))}
+        <div className="mt-10 p-6 bg-white rounded-2xl shadow text-center">
+          <h3 className="text-lg font-semibold mb-2 text-blue-700">
+            💡 Inventory Tips
+          </h3>
+          <p className="text-gray-600">
+            Stay organized by regularly checking and updating your items. Happy
+            managing!
+          </p>
         </div>
       </div>
     </div>
