@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
-import { FaPlus, FaEdit } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
 import Sidebar from "@/components/ui/sidebar";
 import Pagination from "@/components/ui/pagination";
 import Notification from "@/components/ui/notification";
 import fetchWithAuth from "@/utils/fetchInterceptor";
+import Swal from "sweetalert2";
 
 interface ComponentItem {
   id: string;
@@ -45,6 +46,31 @@ export default function AdminItems() {
       setLoading(false);
     }
   };
+
+  const deleteComponent = async (id: string) => {
+    const confirmDelete = await Swal.fire({
+      title: "Are you sure?",
+      text: "This component will be permanently deleted!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+  
+    if (confirmDelete.isConfirmed) {
+      try {
+        // Gunakan itemId dalam URL
+        await fetchWithAuth(`/components/items/${itemId}/components/${id}`, { method: "DELETE" });
+        await fetchData(); // Refresh data setelah penghapusan
+        Swal.fire("Deleted!", "Component has been deleted.", "success");
+      } catch (error) {
+        console.error("Failed to delete component:", error);
+        Swal.fire("Error", "Failed to delete component.", "error");
+      }
+    }
+  };
+  
 
   const filteredItems = items.filter((item) =>
     item.name.toLowerCase().includes(searchQuery.toLowerCase())
@@ -125,6 +151,12 @@ export default function AdminItems() {
                           <FaEdit />
                         </button>
                       </Link>
+                      <button
+                        onClick={() => deleteComponent(item.id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        <FaTrash />
+                      </button>
                     </td>
                   </tr>
                 ))

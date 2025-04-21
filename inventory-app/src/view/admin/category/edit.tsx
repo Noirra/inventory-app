@@ -3,6 +3,7 @@ import { FaArrowLeft, FaSave, } from "react-icons/fa";
 import Sidebar from "@/components/ui/sidebar";
 import { useNavigate, useParams } from "react-router-dom";
 import fetchWithAuth from "@/utils/fetchInterceptor";
+import Swal from "sweetalert2";
 
 export default function EditCategory() {
   const { categoryId } = useParams<{ categoryId: string }>();
@@ -51,9 +52,35 @@ export default function EditCategory() {
       }
   
       navigate("/admin-dashboard/category?success=updated");
-    } catch (error) {
-      console.error("Failed to update category:", error);
+    } catch (error: any) {
+      const msg = error.message || "Terjadi kesalahan";
+
+    const isDuplicate =
+      msg.toLowerCase().includes("duplicate") ||
+      msg.toLowerCase().includes("kode") && msg.toLowerCase().includes("sudah") ||
+      msg.toLowerCase().includes("exists") ||
+      msg.includes("409");
+
+    if (isDuplicate) {
+      await Swal.fire({
+        title: "Kode Kategori Duplikat",
+        text: "Kode kategori sudah digunakan. Gunakan kode lain.",
+        icon: "error",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "OK",
+      });
+    } else {
+      await Swal.fire({
+        title: "Gagal Memperbarui",
+        text: msg,
+        icon: "error",
+        confirmButtonColor: "#d33",
+        confirmButtonText: "OK",
+      });
     }
+
+    console.error("Failed to update category:", error);
+  }
   };
 
 
