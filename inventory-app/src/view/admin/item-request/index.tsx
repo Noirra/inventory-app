@@ -9,7 +9,7 @@ interface Item {
   id: string;
   name: string;
   desc: string;
-  priceRange: string;
+  priceRange: number;
   status: string;
 }
 
@@ -159,7 +159,13 @@ export default function ItemRequestAdmin() {
                   <tr key={item.id} className="border">
                     <td className="p-3 border text-center">{item.name}</td>
                     <td className="p-3 border text-center">{item.desc}</td>
-                    <td className="p-3 border text-center">{item.priceRange}</td>
+                    <td className="p-3 border text-center">
+                      {new Intl.NumberFormat("id-ID", {
+                        style: "currency",
+                        currency: "IDR",
+                        minimumFractionDigits: 0,
+                      }).format(item.priceRange)}
+                    </td>
                     <td className="p-3 border text-center">
                       <span
                         className={`font-semibold ${item.status === "APPROVED"
