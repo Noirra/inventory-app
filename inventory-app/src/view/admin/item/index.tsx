@@ -157,7 +157,9 @@ export default function AdminItem() {
                     <td className="p-3 border text-center">
                       <span
                         className="text-blue-600 cursor-pointer hover:underline"
-                        onClick={() => handleDetail(item)}
+                        onClick={() =>
+                          navigate(`/admin-dashboard/items/komponen/${item.id}`)
+                        }
                       >
                         {item.name}
                       </span>
