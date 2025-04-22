@@ -1,152 +1,198 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import Sidebar from "@/components/sidebar/employee";
 import {
-  FaBars,
-  FaSignOutAlt,
   FaSearch,
   FaBox,
-  FaShoppingCart,
-  FaWarehouse,
-  FaExclamationCircle,
-  FaChartBar,
-  FaCog,
+  FaBoxOpen,
+  FaThLarge,
+  FaUsers,
 } from "react-icons/fa";
-import { Link, useNavigate } from "react-router-dom"; // ✅ Perbaikan: Tambahkan useNavigate di sini
+import fetchWithAuth from "@/utils/fetchInterceptor";
+import Slider from "react-slick";
+import "slick-carousel/slick/slick.css";
+import "slick-carousel/slick/slick-theme.css";
 
-const products = [
-  { name: "Product A", stock: 120, price: 25.0 },
-  { name: "Product B", stock: 80, price: 40.0 },
-  { name: "Product C", stock: 0, price: 15.0 },
-  { name: "Product D", stock: 60, price: 30.0 },
-  { name: "Product E", stock: 200, price: 20.0 },
-];
+type Product = {
+  id: string;
+  name: string;
+  price: number;
+  status: "USED" | "UNUSED";
+  photo?: string;
+  code: string;
+  receipt?: string;
+  examinationPeriodDate: string;
+  examinationPeriodMonth: number;
+};
 
-export default function Dashboard() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const navigate = useNavigate(); // ✅ Pindahkan useNavigate ke dalam komponen
+export default function EmployeeDashboard() {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [userCount, setUserCount] = useState(0);
+  const [itemCount, setItemCount] = useState(0);
+  const [itemrequestCount, setItemRequestCount] = useState(0);
+  const [categoryCount, setCategoryCount] = useState(0);
+  const [items, setItems] = useState<Product[]>([]);
+  const [loadingItems, setLoadingItems] = useState(true);
 
-  const handleLogout = () => {
-    // 👉 Hapus token atau session jika ada
-    localStorage.removeItem("token"); // Opsional jika pakai token
-    navigate("/login"); // ✅ Navigasi ke halaman login
+  useEffect(() => {
+    const userId = localStorage.getItem("userId");
+    const fetchCounts = async () => {
+      try {
+        const [userData, itemData, itemrequestData, categoryData] =
+          await Promise.all([
+            fetchWithAuth("/users"),
+            fetchWithAuth(`/user-items/user/${userId}`),
+            fetchWithAuth("/item-request"),
+            fetchWithAuth("/categories"),
+          ]);
+
+        if (userData.success && Array.isArray(userData.users)) {
+          setUserCount(userData.users.length);
+        }
+
+        if (itemData.success && Array.isArray(itemData.data)) {
+          const extractedItems = itemData.data
+            .map((entry: any) => entry.item)
+            .filter((item: any) => item !== null);
+          setItemCount(extractedItems.length);
+          setItems(extractedItems);
+        }
+
+        if (itemrequestData.success && Array.isArray(itemrequestData.data)) {
+          setItemRequestCount(itemrequestData.data.length);
+        }
+
+        if (categoryData.success && Array.isArray(categoryData.data)) {
+          setCategoryCount(categoryData.data.length);
+        }
+
+        setLoadingItems(false);
+      } catch (error) {
+        console.error("Failed to fetch data:", error);
+        setLoadingItems(false); // fix utama!
+      }
+    };
+
+    fetchCounts();
+  }, []);
+
+  const filteredProducts = items.filter((product) =>
+    (product.name || "").toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  console.log("Items:", items);
+  console.log("Filtered:", filteredProducts);
+  console.log("Loading:", loadingItems);
+
+  const summaryCards = [
+    {
+      title: "Total Users",
+      value: userCount,
+      icon: <FaUsers className="text-green-500" />,
+      borderColor: "border-green-500",
+    },
+    {
+      title: "Items",
+      value: itemCount,
+      icon: <FaBox className="text-blue-500" />,
+      borderColor: "border-blue-500",
+    },
+    {
+      title: "Item Request",
+      value: itemrequestCount,
+      icon: <FaBoxOpen className="text-purple-500" />,
+      borderColor: "border-purple-500",
+    },
+    {
+      title: "Category",
+      value: categoryCount,
+      icon: <FaThLarge className="text-red-500" />,
+      borderColor: "border-red-500",
+    },
+  ];
+
+  const sliderSettings = {
+    dots: true,
+    infinite: false,
+    speed: 500,
+    slidesToShow: 4,
+    slidesToScroll: 1,
+    responsive: [
+      { breakpoint: 1024, settings: { slidesToShow: 3 } },
+      { breakpoint: 768, settings: { slidesToShow: 2 } },
+      { breakpoint: 480, settings: { slidesToShow: 1 } },
+    ],
   };
 
   return (
-    <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <div className={`transition-all duration-300 ${sidebarOpen ? "w-64" : "w-20"} bg-[#0A2342] text-white flex flex-col`}>
-        <div className="flex items-center justify-between px-4 py-4 border-b border-white/20">
-          {sidebarOpen && (
-            <div className="flex items-center space-x-3">
-              <img
-                src="https://via.placeholder.com/40"
-                alt="Profile"
-                className="rounded-full w-10 h-10"
-              />
-              <div>
-                <p className="font-semibold">User Name</p>
-                <p className="text-sm text-gray-300">user@example.com</p>
-              </div>
-            </div>
-          )}
-          <button onClick={() => setSidebarOpen(!sidebarOpen)} className="text-white text-lg">
-            <FaBars />
-          </button>
-        </div>
-
-        <nav className="flex-1 py-4 space-y-2">
-          {["Dashboard", "Inventory", "Settings"].map((item, index) => (
-            <Link
-              key={index}
-              to={item === "Dashboard" ? "/" : `/${item.toLowerCase()}`}
-              className="flex items-center px-4 py-2 hover:bg-[#173E67] rounded-lg space-x-4"
-            >
-              {item === "Dashboard" && <FaChartBar />}
-              {item === "Inventory" && <FaBox />}
-              {item === "Settings" && <FaCog />}
-              {sidebarOpen && <span>{item}</span>}
-            </Link>
-          ))}
-        </nav>
-
-        <div className="p-4">
-          <button
-            onClick={handleLogout} // ✅ Pastikan onClick memanggil handleLogout
-            className="w-full flex items-center justify-center py-2 rounded-2xl bg-red-500 hover:bg-red-600 text-white space-x-2"
-          >
-            <FaSignOutAlt />
-            {sidebarOpen && <span>Logout</span>}
-          </button>
-        </div>
-      </div>
-
-      {/* Main Content */}
+    <div className="bg-gray-100 text-gray-800 flex h-screen">
+      <Sidebar />
       <div className="flex-1 p-6 overflow-y-auto">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold">Welcome Employee!</h1>
-          <div className="flex items-center space-x-4">
-            <div className="flex items-center border rounded-full px-4 py-2 shadow-sm bg-white">
-              <FaSearch className="text-gray-500" />
-              <input
-                type="text"
-                placeholder="Search"
-                className="ml-2 outline-none bg-transparent w-32 focus:w-48 transition-all"
-              />
-            </div>
+        <div className="relative rounded-2xl mb-6 overflow-hidden shadow-lg">
+          <img
+            src="/banner-user.jpg"
+            alt="Welcome Banner"
+            className="w-full h-48 object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-white/60 to-transparent p-6 flex flex-col justify-center">
+            <h1 className="text-3xl font-bold text-gray-800 mb-1 drop-shadow">
+              Welcome back! 🎉
+            </h1>
+            <p className="text-gray-600 font-medium">
+              Here's a summary of your inventory.
+            </p>
           </div>
         </div>
 
-        {/* Overview Cards */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
-          {[
-            { title: "Total Products", value: 5483, icon: <FaBox className="text-green-500" /> },
-            { title: "Orders", value: 2859, icon: <FaShoppingCart className="text-blue-500" /> },
-            { title: "Total Stock", value: 5483, icon: <FaWarehouse className="text-purple-500" /> },
-            { title: "Out of Stock", value: 38, icon: <FaExclamationCircle className="text-red-500" /> },
-          ].map((card, index) => (
-            <div
-              key={index}
-              className="bg-white p-4 rounded-2xl shadow hover:shadow-xl transition transform hover:-translate-y-1 border-t-4 border-green-400"
-            >
-              <div className="flex items-center space-x-4 mb-2">
-                {card.icon}
-                <p className="text-sm text-gray-500">{card.title}</p>
-              </div>
-              <p className="text-3xl font-bold">{card.value}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* All Products */}
-        <div className="bg-white p-6 rounded-2xl shadow border">
-          <h2 className="text-lg font-semibold mb-4">All Products</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product, index) => (
-              <div
-                key={index}
-                className="p-5 rounded-2xl shadow-lg hover:shadow-2xl transition transform hover:-translate-y-1 bg-gradient-to-br from-white to-gray-100 relative overflow-hidden"
-              >
-                <div className="flex justify-between items-center mb-4">
-                  <h3 className="text-lg font-bold text-gray-800">{product.name}</h3>
-                  <span
-                    className={`px-3 py-1 text-xs rounded-full font-semibold shadow ${
-                      product.stock > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"
-                    }`}
-                  >
-                    {product.stock > 0 ? "In Stock" : "Out of Stock"}
-                  </span>
+        <h2 className="text-xl font-semibold mb-4">📦 Your Items</h2>
+        {loadingItems ? (
+          <div className="flex flex-col items-center justify-center py-10">
+            <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mb-4"></div>
+            <p className="text-gray-500">Loading items...</p>
+          </div>
+        ) : filteredProducts.length > 0 ? (
+          <Slider {...sliderSettings}>
+            {filteredProducts.map((product, index) => (
+              <div key={index} className="p-4">
+                <div className="bg-white rounded-2xl shadow-md overflow-hidden transform hover:scale-105 transition-transform duration-300 hover:shadow-xl relative">
+                  <div className="relative h-48 overflow-hidden">
+                    <img
+                      src={
+                        product.photo
+                          ? `https://inventory.bariqfirjatullah.my.id/${product.photo}`
+                          : "/default-image.png"
+                      }
+                      alt={product.name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="p-4">
+                    <h3 className="text-lg font-bold text-gray-800 truncate">
+                      {product.name}
+                    </h3>
+                  </div>
                 </div>
-                <p className="text-sm text-gray-600 mb-1">Stock: {product.stock}</p>
-                <p className="text-sm text-gray-600 mb-2">Price: ${product.price.toFixed(2)}</p>
-                <div className="absolute -top-4 -right-4 text-gray-200 opacity-10 text-7xl pointer-events-none">
-                  <FaBox />
-                </div>
-                <button className="mt-4 w-full py-2 rounded-xl bg-blue-500 text-white font-semibold hover:bg-blue-600 transition">
-                  View Details
-                </button>
               </div>
             ))}
+          </Slider>
+        ) : (
+          <div className="text-center py-10">
+            <img
+              src="/no-data.svg"
+              alt="No items"
+              className="w-40 mx-auto mb-4"
+            />
+            <p className="text-gray-500">No items found.</p>
           </div>
+        )}
+
+        <div className="mt-10 p-6 bg-white rounded-2xl shadow text-center">
+          <h3 className="text-lg font-semibold mb-2 text-blue-700">
+            💡 Inventory Tips
+          </h3>
+          <p className="text-gray-600">
+            Stay organized by regularly checking and updating your items. Happy
+            managing!
+          </p>
         </div>
       </div>
     </div>

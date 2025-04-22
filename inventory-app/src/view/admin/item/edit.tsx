@@ -1,7 +1,8 @@
 import { useState, useEffect, ChangeEvent, FormEvent } from "react";
-import { FaArrowLeft, FaSave, } from "react-icons/fa";
+import { FaArrowLeft, FaSave } from "react-icons/fa";
 import Sidebar from "@/components/ui/sidebar";
 import { useNavigate, useParams } from "react-router-dom";
+import fetchWithAuth from "@/utils/fetchInterceptor";
 
 export default function EditItem() {
   const { itemId } = useParams<{ itemId: string }>();
@@ -12,47 +13,65 @@ export default function EditItem() {
     areaId: "",
     name: "",
     price: "",
-    receipt: "",
-    status: "UNUSED",
     code: "",
     examinationPeriod: "",
+    status: "UNUSED",
     groupCode: "",
   });
+
   const [photo, setPhoto] = useState<File | null>(null);
+  const [receipt, setReceipt] = useState<File | null>(null);
+  const [photoBeforeUrl, setPhotoBeforeUrl] = useState<string | null>(null);
+  const [receiptBeforeUrl, setReceiptBeforeUrl] = useState<string | null>(null);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [areas, setAreas] = useState<{ id: string; name: string }[]>([]);
 
   useEffect(() => {
-    // Simulasi fetch data item berdasarkan itemId
-    const fetchItem = async () => {
+    const fetchData = async () => {
       try {
-        const response = await fetch(`/api/items/${itemId}`); // Ganti dengan URL API backend Laravel
-        const data = await response.json();
-
+        const itemData = await fetchWithAuth(`/items/${itemId}`);
         setItem({
-          categoryId: data.categoryId || "",
-          areaId: data.areaId || "",
-          name: data.name || "",
-          price: data.price || "",
-          receipt: data.receipt || "",
-          status: data.status || "UNUSED",
-          code: data.code || "",
-          examinationPeriod: data.examinationPeriod || "",
-          groupCode: data.groupCode || "",
+          categoryId: itemData.data.categoryId || "",
+          areaId: itemData.data.areaId || "",
+          name: itemData.data.name || "",
+          price: itemData.data.price || "",
+          code: itemData.data.code || "",
+          examinationPeriod: itemData.data.examinationPeriodMonth || "",
+          status: itemData.data.status || "UNUSED",
+          groupCode: itemData.data.groupCode || "",
         });
+
+        // Set image preview
+        setPhotoBeforeUrl(`https://inventory.bariqfirjatullah.my.id/${itemData.data.photo}`);
+        setReceiptBeforeUrl(`https://inventory.bariqfirjatullah.my.id/${itemData.data.receipt}`);
+
+        const categoriesData = await fetchWithAuth("/categories");
+        setCategories(categoriesData.data || []);
+
+        const areasData = await fetchWithAuth("/areas");
+        setAreas(areasData.data || []);
       } catch (error) {
-        console.error("Failed to fetch item:", error);
+        console.error("Failed to fetch data:", error);
       }
     };
 
-    fetchItem();
+    fetchData();
   }, [itemId]);
 
   const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setItem({ ...item, [e.target.name]: e.target.value });
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>, type: "photo" | "receipt") => {
     if (e.target.files && e.target.files.length > 0) {
-      setPhoto(e.target.files[0]);
+      const file = e.target.files[0];
+      if (type === "photo") {
+        setPhoto(file);
+        setPhotoBeforeUrl(URL.createObjectURL(file));
+      } else {
+        setReceipt(file);
+        setReceiptBeforeUrl(URL.createObjectURL(file));
+      }
     }
   };
 
@@ -62,15 +81,14 @@ export default function EditItem() {
     const formData = new FormData();
     Object.entries(item).forEach(([key, value]) => formData.append(key, value));
     if (photo) formData.append("photo", photo);
+    if (receipt) formData.append("receipt", receipt);
 
     try {
-      await fetch(`/api/items/${itemId}`, {
-        method: "PUT", // Gunakan PUT untuk update
+      await fetchWithAuth(`/items/${itemId}`, {
+        method: "PATCH",
         body: formData,
       });
-
-      console.log("Item updated successfully.");
-      navigate("/items");
+      navigate("/admin-dashboard/items?success=updated");
     } catch (error) {
       console.error("Failed to update item:", error);
     }
@@ -78,34 +96,102 @@ export default function EditItem() {
 
   return (
     <div className="flex h-screen bg-gray-100">
-      {/* Sidebar */}
-      <Sidebar /> 
-
-      {/* Main Content */}
+      <Sidebar />
       <div className="flex-1 p-6">
-        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow border p-6">
-          <button onClick={() => navigate("/item")} className="mb-4 flex items-center text-blue-500 hover:underline">
-            <FaArrowLeft className="mr-2" /> Back
-          </button>
-          <h2 className="text-xl font-semibold mb-4">Edit Item</h2>
-          <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-4" encType="multipart/form-data">
-            <input type="text" name="name" value={item.name} placeholder="Item Name" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
-            <input type="text" name="categoryId" value={item.categoryId} placeholder="Category ID" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
-            <input type="text" name="areaId" value={item.areaId} placeholder="Area ID" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
-            <input type="number" name="price" value={item.price} placeholder="Price" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
-            <input type="file" name="photo" accept="image/*" onChange={handleFileChange} className="border p-2 rounded-lg w-full" />
-            <input type="text" name="receipt" value={item.receipt} placeholder="Receipt URL" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
-            <input type="text" name="code" value={item.code} placeholder="Item Code" onChange={handleChange} className="border p-2 rounded-lg w-full" required />
-            <select name="status" value={item.status} onChange={handleChange} className="border p-2 rounded-lg w-full">
-              <option value="UNUSED">UNUSED</option>
-              <option value="USED">USED</option>
-              <option value="BROKEN">BROKEN</option>
-              <option value="REPAIRED">REPAIRED</option>
-            </select>
-            <input type="text" name="examinationPeriod" value={item.examinationPeriod} placeholder="Examination Period" onChange={handleChange} className="border p-2 rounded-lg w-full" />
-            <input type="text" name="groupCode" value={item.groupCode} placeholder="Group Code" onChange={handleChange} className="border p-2 rounded-lg w-full" />
-
-            <div className="col-span-2 flex justify-end">
+        <div className="max-w-4xl mx-auto bg-white rounded-2xl shadow border p-6 relative">
+          <div className="flex justify-between items-center mb-4">
+            <button onClick={() => navigate("/admin-dashboard/items")} className="flex items-center text-blue-500 hover:underline">
+              <FaArrowLeft className="mr-2" /> Back
+            </button>
+            <h2 className="text-xl font-semibold">Edit Item</h2>
+          </div>
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-6">
+            <div className="border p-4 rounded-lg shadow bg-gray-50 relative">
+              <div className="mb-4">
+                <label className="block font-semibold">Item Name</label>
+                <input type="text" name="name" value={item.name} onChange={handleChange} className="border p-2 rounded-lg w-full" required />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block font-semibold">Category</label>
+                  <select name="categoryId" value={item.categoryId} onChange={handleChange} className="border p-2 rounded-lg w-full" required>
+                    <option value="">Select Category</option>
+                    {categories.map((cat) => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block font-semibold">Area</label>
+                  <select name="areaId" value={item.areaId} onChange={handleChange} className="border p-2 rounded-lg w-full" required>
+                    <option value="">Select Area</option>
+                    {areas.map((area) => (
+                      <option key={area.id} value={area.id}>{area.name}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block font-semibold">Examination Period</label>
+                  <input
+                    type="number"
+                    name="examinationPeriod"
+                    value={item.examinationPeriod}
+                    onChange={handleChange}
+                    className="border p-2 rounded-lg w-full"
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold">Price</label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={item.price}
+                    onChange={handleChange}
+                    className="border p-2 rounded-lg w-full"
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-4">
+                <div>
+                  <label className="block font-semibold">Photo</label>
+                  <input
+                    type="file"
+                    name="photo"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, "photo")}
+                    className="border p-2 rounded-lg w-full"
+                  />
+                  {photoBeforeUrl && (
+                    <img
+                      src={photoBeforeUrl}
+                      alt="Current Photo"
+                      className="mt-2 rounded border h-40 object-contain"
+                    />
+                  )}
+                </div>
+                <div>
+                  <label className="block font-semibold">Receipt</label>
+                  <input
+                    type="file"
+                    name="receipt"
+                    accept="image/*"
+                    onChange={(e) => handleFileChange(e, "receipt")}
+                    className="border p-2 rounded-lg w-full"
+                  />
+                  {receiptBeforeUrl && (
+                    <img
+                      src={receiptBeforeUrl}
+                      alt="Current Receipt"
+                      className="mt-2 rounded border h-40 object-contain"
+                    />
+                  )}
+                </div>
+              </div>
+            </div>
+            <div className="flex justify-end">
               <button type="submit" className="bg-green-500 text-white px-4 py-2 rounded-lg flex items-center space-x-2 hover:bg-green-600">
                 <FaSave /> <span>Update Item</span>
               </button>
