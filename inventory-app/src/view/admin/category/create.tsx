@@ -53,9 +53,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
     setTimeout(() => onClose(), 200);
   };
 
-  const handleCloseNotification = () => {
-    setMessage("");
-  };
+
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -117,9 +115,7 @@ const CreateCategoryModal: React.FC<CreateCategoryModalProps> = ({
 
   return (
     <>
-      {message && (
-        <Notification message={message} onClose={handleCloseNotification} />
-      )}
+      
 
       <div
         className={`fixed inset-0 flex justify-center items-center bg-black/20 backdrop-blur-sm transition-opacity duration-200 ${
