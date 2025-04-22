@@ -11,8 +11,8 @@ export const getUsers = async (c: Context) => {
                 roles: {
                     some: {
                         role: {
-                            name: "employee",
-                        },
+                            name: { in: ["employee", "admin"] }
+                        }
                     },
                 },
             },
@@ -166,6 +166,45 @@ export const makeUserAdmin = async (c: Context) => {
         return c.json({ success: true, message: "User role updated to admin" }, 200);
     } catch (error) {
         console.error("Error promoting user to admin:", error);
+        return c.json({ success: false, error: "Internal Server Error" }, 500);
+    }
+};
+
+export const makeUserEmployee = async (c: Context) => {
+    try {
+        const userId = c.req.param("id");
+
+        const user = await prisma.user.findUnique({
+            where: { id: userId },
+            include: { roles: true },
+        });
+
+        if (!user) {    
+            return c.json({ success: false, message: "User not found" }, 404);
+        }
+
+        const employeeRole = await prisma.role.findUnique({
+            where: { name: "employee" },
+        });
+
+        if (!employeeRole) {
+            return c.json({ success: false, message: "Role 'employee' not found" }, 500);
+        }
+
+        await prisma.userRole.deleteMany({
+            where: { userId },
+        });
+
+        await prisma.userRole.create({
+            data: {
+                userId,
+                roleId: employeeRole.id,
+            },
+        });
+
+        return c.json({ success: true, message: "User role updated to employee" }, 200);
+    } catch (error) {
+        console.error("Error demoting user to employee:", error);
         return c.json({ success: false, error: "Internal Server Error" }, 500);
     }
 };

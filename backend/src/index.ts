@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { jwt } from "hono/jwt";
 import authorizeRole from "./routes/middleware/authorizeRole";
+import { serveStatic } from 'hono/bun'
 import { AreaRoutes } from "./routes/areaRoutes";
 import { UserRoutes } from "./routes/userRoutes";
 import { AuthRoutes } from "./routes/authRoutes";
@@ -36,6 +37,7 @@ secureRoute.route("/user-items", userItemRoutes);
 
 const app = new Hono();
 app.use("*", cors());
+app.use('/uploads/*', serveStatic({ root: './' }))
 app.route("/auth", AuthRoutes);
 app.route("/", secureRoute);
 
