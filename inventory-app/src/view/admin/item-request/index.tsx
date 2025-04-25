@@ -168,29 +168,33 @@ export default function ItemRequestAdmin() {
                     </td>
                     <td className="p-3 border text-center">
                       <span
-                        className={`font-semibold ${item.status === "APPROVED"
-                            ? "text-green-600"
+                        className={`px-2 py-1 rounded-full text-xs font-semibold 
+      ${item.status === "APPROVED"
+                            ? "bg-green-100 text-green-700"
                             : item.status === "REJECTED"
-                              ? "text-red-600"
-                              : "text-gray-500"
+                              ? "bg-red-100 text-red-700"
+                              : item.status === "PENDING"
+                                ? "bg-yellow-100 text-yellow-700"
+                                : "bg-gray-100 text-gray-500"
                           }`}
                       >
                         {item.status}
                       </span>
                     </td>
+
                     <td className="p-3 border text-center">
                       {item.status === "PENDING" ? (
                         <div className="flex justify-center gap-2">
-                          { !approvedItems.has(item.id) && (
+                          {!approvedItems.has(item.id) && (
                             <button
-                              className="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-700"
+                              className="bg-green-500 text-white text-sm px-3 py-1 rounded-md hover:bg-green-600 transition"
                               onClick={() => approveItem(item.id)}
                             >
                               Approve
                             </button>
                           )}
                           <button
-                            className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-700"
+                            className="bg-red-500 text-white text-sm px-3 py-1 rounded-md hover:bg-red-600 transition"
                             onClick={() => rejectItem(item.id)}
                           >
                             Reject
@@ -198,13 +202,13 @@ export default function ItemRequestAdmin() {
                         </div>
                       ) : item.status === "APPROVED" ? (
                         <button
-                          className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-700"
+                          className="bg-blue-500 text-white text-sm px-3 py-1 rounded-md hover:bg-blue-600 transition"
                           onClick={() => completeItem(item.id)}
                         >
                           Complete
                         </button>
                       ) : (
-                        <span className="text-gray-400 italic">No actions</span>
+                        <span className="text-gray-400 italic text-sm">No actions</span>
                       )}
                     </td>
                   </tr>

@@ -143,15 +143,14 @@ export default function ItemRequestOwner() {
                     </td>
                     <td className="p-3 border text-center">
                       <span
-                        className={`font-semibold ${
-                          item.status === "PENDING"
-                            ? "text-yellow-600"
+                        className={`px-2 py-1 rounded-full text-sm font-semibold ${item.status === "PENDING"
+                            ? "bg-yellow-100 text-yellow-800"
                             : item.status === "APPROVED"
-                            ? "text-green-600"
-                            : item.status === "REJECTED"
-                            ? "text-red-600"
-                            : "text-gray-500"
-                        }`}
+                              ? "bg-green-100 text-green-800"
+                              : item.status === "REJECTED"
+                                ? "bg-red-100 text-red-800"
+                                : "bg-gray-100 text-gray-600"
+                          }`}
                       >
                         {item.status}
                       </span>

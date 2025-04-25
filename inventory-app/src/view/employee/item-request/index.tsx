@@ -54,8 +54,8 @@ export default function ItemRequestEmployee() {
         successMessage === "created"
           ? "Item added successfully!"
           : successMessage === "updated"
-          ? "Item updated successfully!"
-          : "";
+            ? "Item updated successfully!"
+            : "";
 
       if (message) {
         setMessage(message);
@@ -139,17 +139,17 @@ export default function ItemRequestEmployee() {
                       </td>
                       <td className="p-3 border text-center">
                         <span
-                          className={`px-2 py-1 rounded text-white text-sm ${
-                            item.status === "REJECTED"
+                          className={`inline-block px-3 py-1 rounded-full text-white text-xs font-semibold uppercase tracking-wide
+      ${item.status === "REJECTED"
                               ? "bg-red-500"
                               : item.status === "APPROVED"
-                              ? "bg-green-500"
-                              : item.status === "PENDING"
-                              ? "bg-yellow-500"
-                              : item.status === "COMPLETED"
-                              ? "bg-blue-500"
-                              : "bg-gray-500"
-                          }`}
+                                ? "bg-green-500"
+                                : item.status === "PENDING"
+                                  ? "bg-yellow-500"
+                                  : item.status === "COMPLETED"
+                                    ? "bg-blue-500"
+                                    : "bg-gray-500"
+                            }`}
                         >
                           {item.status}
                         </span>
