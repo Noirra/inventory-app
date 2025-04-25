@@ -178,56 +178,65 @@ export default function OwnerItem() {
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg p-6">
-            <h2 className="text-xl font-semibold mb-4">Item Detail</h2>
-            <div className="space-y-2">
-              <p><strong>Name:</strong> {selectedItem.name}</p>
-              <p><strong>Code:</strong> {selectedItem.code}</p>
-              <p><strong>Price:</strong> Rp {selectedItem.price.toLocaleString("id-ID")}</p>
-              <p><strong>Status:</strong> {selectedItem.status}</p>
-              <p><strong>Examination Period:</strong> {new Date(selectedItem.examinationPeriodDate).toLocaleDateString("id-ID")}</p>
-              <p><strong>Examination Month:</strong> {selectedItem.examinationPeriodMonth}</p>
-              <p>
-                <strong>Category:</strong>{" "}
-                {(() => {
-                  const index = categories.findIndex((cat) => cat.id === selectedItem.categoryId);
-                  return index !== -1 ? `${index + 1}` : "Unknown";
-                })()}
-              </p>
-              <p>
-                <strong>Area:</strong>{" "}
-                {(() => {
-                  const index = areas.findIndex((area) => area.id === selectedItem.areaId)
-                  return index !== -1 ? `${index + 1}` : "Unknown";
-                })()}
-              </p>
-              <p><strong>Receipt:</strong>
-                <img
-                  src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.photo}`}
-                  alt="Item Photo"
-                  className="w-20 h-20 mt-2"
-                />
-              </p>
-              <p><strong>Photo:</strong>
-                <img
-                  src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.receipt}`}
-                  alt="Item Photo"
-                  className="w-20 h-20 mt-2"
-                />
-              </p>
-            </div>
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-black"
-              onClick={() => setShowModal(false)}
-            >
-              ✕
-            </button>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+    <div className="relative w-full max-w-xl bg-white rounded-xl shadow-lg p-6">
+      <h2 className="text-xl font-semibold mb-6">Item Detail</h2>
+      <div className="grid grid-cols-2 gap-4">
+        {/* KIRI */}
+        <div className="space-y-2">
+          <p><strong>Name:</strong> {selectedItem.name}</p>
+          <p>
+            <strong>Category:</strong>{" "}
+            {(() => {
+              const index = categories.findIndex((cat) => cat.id === selectedItem.categoryId);
+              return index !== -1 ? `${index + 1}` : "Unknown";
+            })()}
+          </p>
+          <p>
+            <strong>Area:</strong>{" "}
+            {(() => {
+              const index = areas.findIndex((area) => area.id === selectedItem.areaId);
+              return index !== -1 ? `${index + 1}` : "Unknown";
+            })()}
+          </p>
+          <p><strong>Examination Period:</strong> {new Date(selectedItem.examinationPeriodDate).toLocaleDateString("id-ID")}</p>
+          <div className="flex flex-col">
+            <p><strong>Receipt:</strong></p>
+            <img
+              src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.receipt}`}
+              alt="Receipt"
+              className="w-32 h-32 rounded-md mt-2 border"
+            />
           </div>
         </div>
-      )}
+
+        {/* KANAN */}
+        <div className="space-y-2">
+          <p><strong>Code:</strong> {selectedItem.code}</p>
+          <p><strong>Price:</strong> Rp {selectedItem.price.toLocaleString("id-ID")}</p>
+          <p><strong>Status:</strong> {selectedItem.status}</p>
+          <p><strong>Examination Month:</strong> {selectedItem.examinationPeriodMonth}</p>
+          <div className="flex flex-col">
+            <p><strong>Photo:</strong></p>
+            <img
+              src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.photo}`}
+              alt="Item"
+              className="w-32 h-32 rounded-md mt-2 border"
+            />
+          </div>
+        </div>
+      </div>
+
+      <button
+        className="absolute top-2 right-2 text-gray-500 hover:text-black"
+        onClick={() => setShowModal(false)}
+      >
+        ✕
+      </button>
+    </div>
+  </div>
+)}
     </div>
   );
 }

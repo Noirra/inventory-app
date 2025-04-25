@@ -215,60 +215,63 @@ export default function AdminItem() {
         </div>
       </div>
 
-      {/* Modal */}
       {showModal && selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-          <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
-            <div className="flex justify-between items-center border-b pb-3 mb-4">
-              <h2 className="text-xl font-semibold text-gray-800">Item Detail</h2>
-              <button
-                onClick={() => setShowModal(false)}
-                className="text-gray-500 hover:text-red-500 text-xl"
-              >
-                &times;
-              </button>
-            </div>
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+    <div className="relative bg-white rounded-2xl shadow-xl w-full max-w-lg p-6">
+      <div className="flex justify-between items-center border-b pb-3 mb-4">
+        <h2 className="text-xl font-semibold text-gray-800">Item Detail</h2>
+        <button
+          onClick={() => setShowModal(false)}
+          className="text-gray-500 hover:text-red-500 text-xl"
+        >
+          &times;
+        </button>
+      </div>
 
-            <div className="space-y-3 text-sm text-gray-700">
-              <div><strong>Name:</strong> {selectedItem.name}</div>
-              <div><strong>Price:</strong> Rp {selectedItem.price.toLocaleString("id-ID")}</div>
-              <div><strong>Status:</strong> {selectedItem.status}</div>
-              <div><strong>Examination Period:</strong> {new Date(selectedItem.examinationPeriodDate).toLocaleDateString("id-ID")}</div>
-              <div><strong>Examination Month:</strong> {selectedItem.examinationPeriodMonth}</div>
-              <div>
-                <strong>Category:</strong>{" "}
-                {(() => {
-                  const index = categories.findIndex((cat) => cat.id === selectedItem.categoryId);
-                  return index !== -1 ? `${index + 1}` : "Unknown";
-                })()}
-              </div>
-              <div>
-                <strong>Area:</strong>{" "}
-                {(() => {
-                  const index = areas.findIndex((area) => area.id === selectedItem.areaId);
-                  return index !== -1 ? `${index + 1}` : "Unknown";
-                })()}
-              </div>
-              <div>
-                <strong>Receipt:</strong>
-                <img
-                  src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.receipt}`}
-                  alt="Item Receipt"
-                  className="w-24 h-24 object-cover mt-2 rounded"
-                />
-              </div>
-              <div>
-                <strong>Photo:</strong>
-                <img
-                  src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.photo}`}
-                  alt="Item Photo"
-                  className="w-24 h-24 object-cover mt-2 rounded"
-                />
-              </div>
-            </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-700">
+        <div className="space-y-2">
+          <div><strong>Name:</strong> {selectedItem.name}</div>
+          <div><strong>Category:</strong> {
+            (() => {
+              const index = categories.findIndex((cat) => cat.id === selectedItem.categoryId);
+              return index !== -1 ? `${index + 1}` : "Unknown";
+            })()}
+          </div>
+          <div><strong>Area:</strong> {
+            (() => {
+              const index = areas.findIndex((area) => area.id === selectedItem.areaId);
+              return index !== -1 ? `${index + 1}` : "Unknown";
+            })()}
+          </div>
+          <div><strong>Examination Period:</strong> {new Date(selectedItem.examinationPeriodDate).toLocaleDateString("id-ID")}</div>
+          <div>
+            <strong>Receipt:</strong>
+            <img
+              src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.receipt}`}
+              alt="Item Receipt"
+              className="w-24 h-24 object-cover mt-2 rounded"
+            />
           </div>
         </div>
-      )}
+
+        <div className="space-y-2">
+          <div><strong>Code:</strong> {selectedItem.code}</div>
+          <div><strong>Price:</strong> Rp {selectedItem.price.toLocaleString("id-ID")}</div>
+          <div><strong>Status:</strong> {selectedItem.status}</div>
+          <div><strong>Examination Month:</strong> {selectedItem.examinationPeriodMonth}</div>
+          <div>
+            <strong>Photo:</strong>
+            <img
+              src={`https://inventory.bariqfirjatullah.my.id/${selectedItem.photo}`}
+              alt="Item Photo"
+              className="w-24 h-24 object-cover mt-2 rounded"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+)}
     </div>
   );
 }
