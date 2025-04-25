@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/ui/sidebar";
-import { FaPlus, FaEdit, FaTrash } from "react-icons/fa";
+import { FaPlus, FaEdit, FaTrash, FaSpinner } from "react-icons/fa";
 import Pagination from "@/components/ui/pagination";
 import Notification from "@/components/ui/notification";
 import { useNavigate } from "react-router-dom";
@@ -26,6 +26,8 @@ export default function AdminArea() {
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState<"create" | "edit">("create");
   const [selectedArea, setSelectedArea] = useState<Areas | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+
 
   const handleCloseNotification = () => {
     setMessage("");
@@ -87,6 +89,7 @@ export default function AdminArea() {
     });
 
     if (confirmDelete.isConfirmed) {
+      setIsProcessing(true);
       try {
         await fetchWithAuth(`/areas/${id}`, { method: "DELETE" });
         fetchData();
@@ -94,6 +97,8 @@ export default function AdminArea() {
       } catch (error) {
         console.error("Failed to delete area:", error);
         Swal.fire("Error", "Failed to delete area.", "error");
+      } finally {
+        setIsProcessing(false); // <-- stop loading
       }
     }
   };
@@ -123,10 +128,12 @@ export default function AdminArea() {
   };
 
   const handleAreaSuccess = async () => {
+    setIsProcessing(true);
     await fetchData();       
     setShowModal(false);    
     setMessage("Berhasil disimpan!");
     setTimeout(() => setMessage(""), 3000);
+    setIsProcessing(false);
   };
 
   return (
@@ -187,15 +194,18 @@ export default function AdminArea() {
                     <td className="p-3 border text-center space-x-2">
                       <button
                         onClick={() => handleEditArea(area)}
-                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600"
+                        className="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 disabled:opacity-50"
+                        disabled={isProcessing}
                       >
-                        <FaEdit />
+                        {isProcessing ? <FaSpinner className="animate-spin" /> : <FaEdit />}
                       </button>
+
                       <button
                         onClick={() => deleteArea(area.id)}
-                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 disabled:opacity-50"
+                        disabled={isProcessing}
                       >
-                        <FaTrash />
+                        {isProcessing ? <FaSpinner className="animate-spin" /> : <FaTrash />}
                       </button>
                     </td>
                   </tr>
