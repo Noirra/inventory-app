@@ -1,4 +1,3 @@
-// Import tetap
 import { useEffect, useState } from "react";
 import Sidebar from "@/components/ui/sidebar";
 import {
@@ -9,11 +8,9 @@ import {
   FaUsers,
 } from "react-icons/fa";
 import fetchWithAuth from "@/utils/fetchInterceptor";
-import Slider from "react-slick";
 import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 
-// Tipe data Product ditambahkan properti lain
 type Product = {
   id: string;
   name: string;
@@ -113,23 +110,10 @@ export default function AdminDashboard() {
     },
   ];
 
-  const sliderSettings = {
-    dots: true,
-    infinite: false,
-    speed: 500,
-    slidesToShow: 4,
-    slidesToScroll: 1,
-    responsive: [
-      { breakpoint: 1024, settings: { slidesToShow: 3 } },
-      { breakpoint: 768, settings: { slidesToShow: 2 } },
-      { breakpoint: 480, settings: { slidesToShow: 1 } },
-    ],
-  };
-
   return (
-    <div className="bg-gray-100 text-gray-800 flex h-screen">
+    <div className="bg-gray-100 text-gray-800 flex h-screen overflow-hidden">
       <Sidebar />
-      <div className="flex-1 p-6 overflow-y-auto">
+      <div className="flex-1 p-6 flex flex-col">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-bold mb-1">Admin Inventory</h1>
@@ -151,7 +135,6 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Summary Cards */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {summaryCards.map((card, index) => (
             <div
@@ -167,8 +150,7 @@ export default function AdminDashboard() {
           ))}
         </div>
 
-        {/* Filter */}
-        <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow mb-6">
+        <div className="flex items-center justify-between bg-white p-4 rounded-2xl shadow mb-4">
           <h2 className="text-lg font-semibold">All Products</h2>
           <div className="flex items-center space-x-2">
             <label htmlFor="statusFilter" className="text-sm font-medium">
@@ -187,14 +169,16 @@ export default function AdminDashboard() {
           </div>
         </div>
 
-        {/* Product Slider */}
-        {loadingItems ? (
-          <p className="text-gray-500 text-center py-10">Loading products...</p>
-        ) : filteredProducts.length > 0 ? (
-          <Slider {...sliderSettings}>
-            {filteredProducts.map((product, index) => (
-              <div key={index} className="p-4">
-                <div className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden">
+        <div className="flex-1 overflow-y-auto pr-2">
+          {loadingItems ? (
+            <p className="text-gray-500 text-center py-10">Loading products...</p>
+          ) : filteredProducts.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              {filteredProducts.map((product, index) => (
+                <div
+                  key={index}
+                  className="bg-white rounded-2xl shadow-lg hover:shadow-2xl transition duration-300 overflow-hidden"
+                >
                   <div className="relative h-48 overflow-hidden">
                     <img
                       src={`https://inventory.bariqfirjatullah.my.id/${product.photo}`}
@@ -232,71 +216,56 @@ export default function AdminDashboard() {
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
-          </Slider>
-        ) : (
-          <p className="text-gray-500 text-center py-10">No products found.</p>
+              ))}
+            </div>
+          ) : (
+            <p className="text-gray-500 text-center py-10">
+              No products found.
+            </p>
+          )}
+        </div>
+
+        {isModalOpen && selectedProduct && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
+            <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg p-6">
+              <img
+                src={`https://inventory.bariqfirjatullah.my.id/${selectedProduct.photo}`}
+                alt={selectedProduct.name}
+                className="w-full h-48 object-cover rounded-lg mb-4"
+              />
+              <h2 className="text-xl font-bold mb-2">{selectedProduct.name}</h2>
+              <p className="text-sm text-gray-700 mb-1">
+                <strong>Price:</strong> Rp.{" "}
+                {selectedProduct.price.toLocaleString("id-ID")}
+              </p>
+              <p className="text-sm text-gray-700 mb-1">
+                <strong>Status:</strong> {selectedProduct.status}
+              </p>
+              <p className="text-sm text-gray-700 mb-1">
+                <strong>Examination Month:</strong>{" "}
+                {selectedProduct.examinationPeriodMonth}
+              </p>
+              <p className="text-sm text-gray-700 mb-4">
+                <strong>Examination Date:</strong>{" "}
+                {new Date(
+                  selectedProduct.examinationPeriodDate
+                ).toLocaleDateString("id-ID")}
+              </p>
+              <img
+                src={`https://inventory.bariqfirjatullah.my.id/${selectedProduct.receipt}`}
+                alt="Receipt"
+                className="w-full h-40 object-contain bg-gray-100 rounded-lg"
+              />
+              <button
+                className="mt-6 w-full py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
+                onClick={() => setIsModalOpen(false)}
+              >
+                Close
+              </button>
+            </div>
+          </div>
         )}
       </div>
-
-      {/* Modal */}
-      {isModalOpen && selectedProduct && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-    <div className="relative w-full max-w-md bg-white rounded-xl shadow-lg p-6">
-
-      {/* Gambar utama produk */}
-      <img
-        src={`https://inventory.bariqfirjatullah.my.id/${selectedProduct.photo}`}
-        alt={selectedProduct.name}
-        className="w-full h-48 object-cover rounded-lg mb-4"
-      />
-
-      {/* Nama produk */}
-      <h2 className="text-xl font-bold mb-2">{selectedProduct.name}</h2>
-
-      {/* Detail harga */}
-      <p className="text-sm text-gray-700 mb-1">
-        <strong>Price:</strong> Rp{" "}
-        {selectedProduct.price.toLocaleString("id-ID")}
-      </p>
-
-      {/* Status */}
-      <p className="text-sm text-gray-700 mb-1">
-        <strong>Status:</strong> {selectedProduct.status}
-      </p>
-
-      {/* Examination Period Month */}
-      <p className="text-sm text-gray-700 mb-1">
-        <strong>Examination Month:</strong>{" "}
-        {selectedProduct.examinationPeriodMonth}
-      </p>
-
-      {/* Examination Period Date */}
-      <p className="text-sm text-gray-700 mb-4">
-        <strong>Examination Date:</strong>{" "}
-        {new Date(selectedProduct.examinationPeriodDate).toLocaleDateString(
-          "id-ID"
-        )}
-      </p>
-
-      {/* Gambar bukti (receipt) */}
-      <img
-        src={`https://inventory.bariqfirjatullah.my.id/${selectedProduct.receipt}`}
-        alt="Receipt"
-        className="w-full h-40 object-contain bg-gray-100 rounded-lg"
-      />
-
-      {/* Tombol Close di bagian bawah */}
-      <button
-        className="mt-6 w-full py-2 bg-blue-600 text-white rounded-xl hover:bg-blue-700 transition"
-        onClick={() => setIsModalOpen(false)}
-      >
-        Close
-      </button>
-    </div>
-  </div>
-)}
     </div>
   );
 }

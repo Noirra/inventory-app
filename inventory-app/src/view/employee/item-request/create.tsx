@@ -87,13 +87,13 @@ export default function CreateItemRequest() {
             </div>
             <div>
               <label htmlFor="priceRange" className="block mb-1 font-medium">
-                Price Range
+                Item Price
               </label>
               <input
-                type="text"
+                type="number"
                 name="priceRange"
                 id="priceRange"
-                placeholder="e.g. $100 - $200"
+                placeholder="Enter Item Price"
                 onChange={handleChange}
                 className="border p-2 rounded-lg w-full"
                 required

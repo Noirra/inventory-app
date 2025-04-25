@@ -58,8 +58,17 @@ export const createCategory = async (c: Context) => {
         if (!code || code.length > 3) {
             return c.json({
                 success: false,
-                message: "code must be at most 3 characters.",
+                message: "Code must be at most 3 characters.",
             }, 400);
+        }
+
+        // Cek apakah kode sudah digunakan
+        const existing = await prisma.category.findUnique({ where: { code } });
+        if (existing) {
+            return c.json({
+                success: false,
+                message: "Kode kategori sudah digunakan.",
+            }, 409); // Status 409 = Conflict
         }
 
         const category = await prisma.category.create({
@@ -101,6 +110,23 @@ export const updateCategory = async (c: Context) => {
                 success: false,
                 message: "Category Not Found!",
             }, 404);
+        }
+
+        // Jika user mengubah code, pastikan tidak sama dengan kategori lain
+        if (code) {
+            const codeUsed = await prisma.category.findFirst({
+                where: {
+                    code,
+                    NOT: { id: categoryId }, // Pastikan bukan dirinya sendiri
+                },
+            });
+
+            if (codeUsed) {
+                return c.json({
+                    success: false,
+                    message: "Kode kategori sudah digunakan.",
+                }, 409);
+            }
         }
 
         const updatedCategory = await prisma.category.update({
