@@ -1,10 +1,11 @@
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/sidebar/owner";
-import { FaInfoCircle } from "react-icons/fa";
+import { FaInfoCircle, FaTrash   } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
 import Pagination from "@/components/ui/pagination";
 import Notification from "@/components/ui/notification";
 import fetchWithAuth from "@/utils/fetchInterceptor";
+import Swal from "sweetalert2";
 
 interface Item {
   id: string;
@@ -87,6 +88,28 @@ export default function OwnerItem() {
     }
   }, []);
 
+  const deleteItems = async (id: string) => {
+    const confirmDelete = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    });
+
+    if (confirmDelete.isConfirmed) {
+      try {
+        await fetchWithAuth(`/items/${id}`, { method: "DELETE" });
+        fetchData();
+        Swal.fire("Deleted!", "items has been deleted.", "success");
+      } catch (error) {
+        console.error("Failed to delete items:", error);
+        Swal.fire("Error", "Failed to delete items.", "error");
+      }
+    }
+  };
 
 
   const filteredItems = items.filter((item) =>
@@ -157,6 +180,12 @@ export default function OwnerItem() {
                         className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                       >
                         <FaInfoCircle />
+                      </button>
+                      <button
+                        onClick={() => deleteItems(item.id)}
+                        className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+                      >
+                        <FaTrash />
                       </button>
                     </td>
                   </tr>
